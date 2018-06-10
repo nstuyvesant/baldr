@@ -6,9 +6,16 @@ app.get('/', (req, res) => {
   let client = new Client()
   // Using connectSync and querySync for a web server is bad practice but perfect for report generation
   client.connectSync('postgresql://postgres@localhost:5432/vr')
-  let rows = client.querySync("SELECT cloudSnapshots('2018-06-09'::DATE)")
-  res.send(rows[0].cloudsnapshots)
-  // res.send('Iterate through clouds, get JSON from function, merge with HTML, generate PDF, email.'))
+
+  // We can either let node calculate the date or get it from the bash shell script that invokes this
+  // const today = new Date().toISOString().split('T')[0]
+  // let rows = client.querySync(`SELECT cloudSnapshots('${today}'::DATE)`)
+
+  // For now, pass the date for the test data we know to be there
+  let rows = client.querySync("SELECT cloudSnapshots('2018-06-10'::DATE)")
+  let clouds = rows[0].cloudsnapshots
+  res.send(clouds)
+  // TODO: iterate through clouds array, merge with report.html, generate PDF, email 
 })
 
 app.listen(3000, () => console.log('Report server listening on port 3000.'))
