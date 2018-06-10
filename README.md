@@ -17,7 +17,7 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 ### Project setup
 
-1. Launch *Terminal* on macOS.
+1. Launch __Terminal__ on macOS.
 
 2. Make sure prerequisites are installed for your operating system (commands above are for macOS). If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installation of the other brew packages.
 
@@ -33,7 +33,7 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 - [db_create.sql](https://github.com/nstuyvesant/baldr/blob/master/db_create.sql) - Creates the PostgreSQL database, functions to generate JSON and populates with sample data
 
-- [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Brief example using pg-native to pass current date to get JSON array of clouds and display on page. See Backlog for next steps.
+- [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Brief example of [ExpressJS](http://expressjs.com) with [pg-native](https://github.com/brianc/node-pg-native) to pass current date to get JSON array of clouds and display on page. See Backlog for next steps.
 
 ### Backlog
 
@@ -41,7 +41,7 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 2. Generate a PDF from each using [pdfkit](https://github.com/devongovett/pdfkit)
 
-3. Email PDF to list of addresses in *emailRecipients* property using [nodemailer](https://nodemailer.com)
+3. Email PDF to list of addresses in __emailRecipients__ property using [nodemailer](https://nodemailer.com)
 
 4. Create bash shell script [generate-baldr-reports.sh](https://github.com/nstuyvesant/baldr/blob/master/generate-baldr-reports.sh) to start node and request [http://localhost:3000](http://localhost:3000) via curl once a day using cron
 
