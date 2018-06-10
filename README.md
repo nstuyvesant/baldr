@@ -49,6 +49,8 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 6. Ran and Uzi to update vr database daily with their tools
 
+7. Maybe get rid of ExpressJS since this isn't really a web server
+
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
 [node]: https://img.shields.io/badge/nodejs-10.4.0-green.svg
