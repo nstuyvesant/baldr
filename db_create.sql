@@ -207,8 +207,8 @@ CREATE VIEW clouds_snapshots AS
         snapshots ON clouds.id = snapshots.cloud_id;
 
 -- Return a complete snapshot for a cloud on a particular date in JSON format
-CREATE OR REPLACE FUNCTION snapshot_as_json(character varying(255), date) RETURNS json AS $$
-    SELECT row_to_json(s) FROM (
+CREATE OR REPLACE FUNCTION cloudSnapshots(date) RETURNS json AS $$
+    SELECT array_to_json(array_agg(row_to_json(s))) FROM (
         SELECT
             fqdn, email_recipients AS "emailRecipients", snapshot_date AS "snapshotDate", success_last24h AS last24h,
             success_last7d AS last7d, success_last30d AS last30d, lab_issues AS lab, orchestration_issues AS orchestration,
@@ -241,11 +241,11 @@ CREATE OR REPLACE FUNCTION snapshot_as_json(character varying(255), date) RETURN
                 ) t
             ) AS "topFailingTests"
         FROM clouds_snapshots
-        WHERE fqdn = $1 AND snapshot_date = $2::DATE) s;
+        WHERE snapshot_date = $1::DATE) s;
 $$ LANGUAGE sql;
 
 -- Run the function to populate the date
 SELECT populate_test_data();
 
 -- Show what the JSON looks like
-SELECT snapshot_as_json('acme.perfectomobile.com', '2018-06-09'::DATE);
+SELECT cloudSnapshots('2018-06-09'::DATE);

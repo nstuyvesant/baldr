@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Report of obstacles to successful automation",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nstuyvesant/baldr.git"
@@ -17,8 +14,17 @@
   },
   "homepage": "https://github.com/nstuyvesant/baldr#readme",
   "dependencies": {
+    "eslint": "^4.19.1",
     "express": "^4.16.3",
     "pdfkit": "^0.8.3",
     "pg-native": "^3.0.0"
-  }
+  },
+  "engines": {
+    "node": "~10.4.0",
+    "npm": "~6.1.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "private": true
 }
