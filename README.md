@@ -27,7 +27,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data
 
-6. Type `npm start` then go to [http://localhost:3000](http://localhost:3000) to see the JSON output
+6. Type `npm start` then go to [http://localhost:3000](http://localhost:3000) to see the JSON output. This is an initial step. See __Backlog__ below.
 
 ### Overview of files
 
@@ -39,7 +39,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 1. Iterate through array of clouds to merge each element with [report.html](https://github.com/nstuyvesant/baldr/blob/master/report.html)
 
-2. Generate a PDF from each using [pdfkit](https://github.com/devongovett/pdfkit)
+2. Generate PDF from each using [pdfkit](https://github.com/devongovett/pdfkit)
 
 3. Email PDF to list of addresses in __emailRecipients__ property using [nodemailer](https://nodemailer.com)
 
