@@ -30,9 +30,15 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 6. Type `npm start` then go to [http://localhost:3000](http://localhost:3000) to see the JSON output
 
+### Overview of files
+
+- [db_create.sql](https://github.com/nstuyvesant/baldr/blob/master/db_create.sql) - Creates the PostgreSQL database, functions to generate JSON and populates with sample data
+
+- [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Brief example using pg-native to pass current date to get JSON array of clouds and display on page. See Backlog for next steps.
+
 ### Backlog
 
-1. Iterate through array of clouds and generate one HTML report for each
+1. Iterate through array of clouds to merge each element with [report.html](https://github.com/nstuyvesant/baldr/blob/master/report.html)
 
 2. Generate a PDF from each
 
