@@ -3,7 +3,7 @@
 [![node][node]][node-url]
 
 # Perfecto Reporting
-Named after the Norse God of Light, this project generates emailed PDF reports to increase visibility of barriers to automation.
+Named after the Norse God of Light, this project will (eventually) generate emailed PDF reports to increase visibility of automation obstacles.
 
 ## Getting Started
 
@@ -11,19 +11,19 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 - [Homebrew](https://brew.sh) (`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`)
 - [Git](https://git-scm.com/) (`brew install git`)
-- [Node.js 9.7.1 and npm 5.7.1](nodejs.org) (`brew install node`)
-- [PostgreSQL 10.3.0](http://postgresql.org) (`brew install postgresql`)
-- [pgAdmin4](https://www.postgresql.org/download/) (download and install it)
+- [Node.js 10.4.0 and npm 6.1.0](nodejs.org) (`brew install node`)
+- [PostgreSQL 10.4.0](http://postgresql.org) (`brew install postgresql`)
+- [pgAdmin4 3.0](https://www.postgresql.org/download/) (download and install it)
 
 ### Project setup
 
-1. Launch __Terminal__ on macOS.
+1. Launch __Terminal__ on your Mac.
 
-2. Make sure prerequisites are installed for your operating system (commands above are for macOS). If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installation of the other brew packages.
+2. Make sure prerequisites are installed. If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installing other brew packages.
 
 3. Type `git clone https://github.com/nstuyvesant/baldr.git && cd baldr && npm install` to clone the project and install dependencies
 
-4. Type `brew services start postgresql` to start PostgreSQL
+4. Type `brew services start postgresql` to start PostgreSQL (if not already running)
 
 5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data
 
@@ -44,6 +44,8 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 3. Email PDF to list of addresses in __emailRecipients__ property using [nodemailer](https://nodemailer.com)
 
 4. Create bash shell script [generate-baldr-reports.sh](https://github.com/nstuyvesant/baldr/blob/master/generate-baldr-reports.sh) to start node and request [http://localhost:3000](http://localhost:3000) via curl once a day using cron
+
+5. Adapt everything to run on Ubuntu (not much effort needed - mainly date command parameters in bash shell script)
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-blue.svg
 [express-url]: http://expressjs.com
