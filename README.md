@@ -17,7 +17,7 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 ### Project setup
 
-1. Launch #Terminal# on macOS.
+1. Launch _Terminal_ on macOS.
 
 2. Make sure prerequisites are installed for your operating system (commands above are for macOS). If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installation of the other brew packages.
 
@@ -42,6 +42,8 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 2. Generate a PDF from each
 
 3. Email PDF to list of addresses in emailRecipients property
+
+4. Create bash shell script to start node and request [http://localhost:3000](http://localhost:3000) via curl once a day using cron
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-blue.svg
 [express-url]: http://expressjs.com
