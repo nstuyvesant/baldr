@@ -1,0 +1,24 @@
+{
+  "name": "baldr",
+  "version": "1.0.0",
+  "description": "Report of obstacles to successful automation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nstuyvesant/baldr.git"
+  },
+  "author": "Nate Stuyvesant",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nstuyvesant/baldr/issues"
+  },
+  "homepage": "https://github.com/nstuyvesant/baldr#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "pdfkit": "^0.8.3",
+    "pg-native": "^3.0.0"
+  }
+}
