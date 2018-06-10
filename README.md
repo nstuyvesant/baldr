@@ -13,11 +13,11 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 - [Git](https://git-scm.com/) (`brew install git`)
 - [Node.js 9.7.1 and npm 5.7.1](nodejs.org) (`brew install node`)
 - [PostgreSQL 10.3.0](http://postgresql.org) (`brew install postgresql`)
-- [pgAdmin4](https://www.postgresql.org/download/)
+- [pgAdmin4](https://www.postgresql.org/download/) (download and install it)
 
 ### Project setup
 
-1. Launch _Terminal_ on macOS.
+1. Launch *Terminal* on macOS.
 
 2. Make sure prerequisites are installed for your operating system (commands above are for macOS). If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installation of the other brew packages.
 
@@ -39,11 +39,11 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 1. Iterate through array of clouds to merge each element with [report.html](https://github.com/nstuyvesant/baldr/blob/master/report.html)
 
-2. Generate a PDF from each
+2. Generate a PDF from each using [pdfkit](https://github.com/devongovett/pdfkit)
 
-3. Email PDF to list of addresses in emailRecipients property
+3. Email PDF to list of addresses in *emailRecipients* property using [nodemailer](https://nodemailer.com)
 
-4. Create bash shell script to start node and request [http://localhost:3000](http://localhost:3000) via curl once a day using cron
+4. Create bash shell script [generate-baldr-reports.sh](https://github.com/nstuyvesant/baldr/blob/master/generate-baldr-reports.sh) to start node and request [http://localhost:3000](http://localhost:3000) via curl once a day using cron
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-blue.svg
 [express-url]: http://expressjs.com
