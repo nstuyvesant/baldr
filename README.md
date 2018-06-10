@@ -7,20 +7,19 @@ Named after the Norse God of Light, this project generates emailed PDF reports t
 
 ## Getting Started
 
-### Prerequisites
+### Prerequisites for macOS
 
-- [Homebrew](https://brew.sh) (on macOS `/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-`)
-- [Git](https://git-scm.com/) (on macOS `brew install git`)
+- [Homebrew](https://brew.sh) (`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`)
+- [Git](https://git-scm.com/) (`brew install git`)
 - [Node.js 9.7.1 and npm 5.7.1](nodejs.org) (`brew install node`)
 - [PostgreSQL 10.3.0](http://postgresql.org) (`brew install postgresql`)
 - [pgAdmin4](https://www.postgresql.org/download/)
 
 ### Project setup
 
-1. Launch Terminal on macOS.
+1. Launch #Terminal# on macOS.
 
-2. Make sure prerequisites are installed for your operating system (commands above are for macOS). If Homebrew was already installed, be sure to run `brew doctor` and address any issues before the installation of the other brew packages.
+2. Make sure prerequisites are installed for your operating system (commands above are for macOS). If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installation of the other brew packages.
 
 3. Type `git clone https://github.com/nstuyvesant/baldr.git && cd baldr && npm install` to clone the project and install dependencies
 
