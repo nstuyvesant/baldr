@@ -1,7 +1,19 @@
 -- Meant to be run from PSQL:
 -- $ psql -d postgres -f db_create.sql
 
--- Create database
+-- Create user if doesn't exist
+DO
+$do$
+BEGIN
+   IF NOT EXISTS (
+      SELECT                       -- SELECT list can stay empty for this
+      FROM   pg_catalog.pg_roles
+      WHERE  rolname = 'postgres') THEN
+
+      CREATE ROLE postgres LOGIN PASSWORD 'mysecret123';
+   END IF;
+END
+$do$;
 
 -- Forcefully disconnect anyone
 SELECT pid, pg_terminate_backend(pid) 
@@ -10,6 +22,7 @@ WHERE datname = 'vr' AND pid <> pg_backend_pid();
 
 DROP DATABASE IF EXISTS vr;
 
+-- Create database
 CREATE DATABASE vr
     WITH 
     OWNER = postgres
@@ -248,4 +261,4 @@ $$ LANGUAGE sql;
 SELECT populate_test_data();
 
 -- Show what the JSON looks like
-SELECT cloudSnapshots('2018-06-09'::DATE);
+SELECT cloudSnapshots('2018-06-10'::DATE);
