@@ -15,6 +15,8 @@ BEGIN
 END
 $do$;
 
+ALTER ROLE postgres SUPERUSER CREATE;
+
 -- Forcefully disconnect anyone
 SELECT pid, pg_terminate_backend(pid) 
 FROM pg_stat_activity 
@@ -255,6 +257,8 @@ CREATE OR REPLACE FUNCTION cloudSnapshots(date) RETURNS json AS $$
         FROM clouds_snapshots
         WHERE snapshot_date = $1::DATE) s;
 $$ LANGUAGE sql;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres; 
 
 -- Run the function to populate the date
 SELECT populate_test_data();
