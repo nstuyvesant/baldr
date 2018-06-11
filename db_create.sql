@@ -35,8 +35,8 @@ CREATE DATABASE vr
 COMMENT ON DATABASE vr
     IS 'Value Realization';
 
+-- Connect to vr database
 \connect vr
-
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -105,7 +105,6 @@ COMMENT ON COLUMN public.recommendations.rank IS 'Report ranking of the importan
 COMMENT ON COLUMN public.recommendations.recommendation IS 'Specific recommendation such as "Replace top 5 failing devices" or "Remediate TransferMoney test"';
 COMMENT ON COLUMN public.recommendations.impact_percentage IS 'Percentage of improvement to success rate if the recommendation is implemented (use 0 to 100 rather than decimal < 1)';
 COMMENT ON COLUMN public.recommendations.impact_message IS 'For recommendations that do not have a clear impact such as "Ensure tests use Digitalzoom API" (impact should equal 0 for those)';
-
 
 CREATE TABLE public.tests (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
