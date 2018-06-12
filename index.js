@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
   // let rows = client.querySync(`SELECT cloudSnapshots('${today}'::DATE)`)
 
   // For now, pass the date for the test data we know to be there
-  let rows = client.querySync("SELECT cloudSnapshots('2018-06-10'::DATE)")
+  let rows = client.querySync("SELECT cloudSnapshots('acme.perfectomobile.com', '2018-06-12'::DATE)")
   let clouds = rows[0].cloudsnapshots
   res.send(clouds)
   // TODO: iterate through clouds array, merge with report.html, generate PDF, email 

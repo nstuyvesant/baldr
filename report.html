@@ -69,7 +69,7 @@
             <div class="col-md-2 text-center">
                 <div class="card">
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last30d"></span>%</span><br/>Last 30d
+                        <span class="metric font-weight-bold"><span id="last14d"></span>%</span><br/>Last 14d
                     </div>
                 </div>
             </div>
@@ -150,7 +150,6 @@
     <script>
         const reportData = {
             fqdn: 'acme.perfectomobile.com',
-            emailRecipients: 'nul@bitbucket.com',
             snapshotDate: '2018-06-07',
             last24h: 37,
             last7d: 72,
@@ -161,7 +160,7 @@
             recommendations: [
                 {
                     rank: 1,
-                    recommendation: 'Replace top 5 failing devices',
+                    recommendation: 'Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors',
                     impact: 30
                 },
                 {
@@ -176,7 +175,7 @@
                 },
                 {
                     rank: 4,
-                    recommendation: 'Remediate FindBranch test',
+                    recommendation: 'XPath /bookstore/book[1]/title is broken (affects 30 tests)',
                     impact: 6
                 },
                 {
@@ -352,7 +351,7 @@
             $('#last24h').text(reportData.last24h)
             $('#last24h').colorCode()
             $('#last7d').text(reportData.last7d).colorCode()
-            $('#last30d').text(reportData.last30d).colorCode()
+            $('#last14d').text(reportData.last14d).colorCode()
             let totalImpact = 0
             let tableRow = ''
             let impactText = ''
