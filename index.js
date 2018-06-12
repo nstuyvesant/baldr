@@ -4,8 +4,13 @@ const app = express()
 
 app.get('/', (req, res) => {
   let client = new Client()
-  client.connectSync('postgresql://postgres@localhost:5432/vr')
-  let rows = client.querySync("SELECT cloudSnapshots('acme.perfectomobile.com', '2018-06-12'::DATE)")
+  client.connect('postgresql://postgres@localhost:5432/vr', (err) => {
+    if (err) throw err
+    client.query("SELECT cloudSnapshots('acme.perfectomobile.com', '2018-06-12'::DATE)", (err, rows)=> {
+      res.send(rows)
+    })
+  })
+  
   // TODO: Get fqdn (fully-qualified domain name) and date from a querystring and pass as variables to the line above
 })
 
