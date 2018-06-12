@@ -46,10 +46,23 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE public.clouds (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    fqdn character varying(255) UNIQUE
+    fqdn character varying(255) UNIQUE,
+    last_update date DEFAULT CURRENT_DATE
 );
 
 COMMENT ON COLUMN public.clouds.fqdn IS 'Fully-qualified domain name of the Perfecto cloud';
+COMMENT ON COLUMN public.clouds.last_update IS 'Last time Uzi updated the data';
+
+CREATE TABLE public.test_age (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    cloud_id uuid NOT NULL REFERENCES clouds(id),
+    test_name character varying(4000) NOT NULL,
+    first_seen date DEFAULT CURRENT_DATE NOT NULL,
+    UNIQUE (cloud_id, test_name)
+);
+
+COMMENT ON COLUMN public.test_age.cloud_id IS 'Foreign key to  cloud';
+COMMENT ON COLUMN public.test_age.first_seen IS 'First date we saw that test';
 
 CREATE TABLE public.snapshots (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -67,6 +80,7 @@ COMMENT ON COLUMN public.snapshots.success_rate IS 'Success rate for last 24 hou
 COMMENT ON COLUMN public.snapshots.lab_issues IS 'The number of script failures due to device or browser issues in the lab over the last 24 hours';
 COMMENT ON COLUMN public.snapshots.orchestration_issues IS 'The number of script failures due to attempts to use the same device';
 COMMENT ON COLUMN public.snapshots.scripting_issues IS 'The number of script failures due to a problem with the script or framework over the past 24 hours';
+
 
 CREATE TABLE public.devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -142,6 +156,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Return cloud_id parent from snapshot_id
+CREATE OR REPLACE FUNCTION cloud_get_id(uuid) RETURNS uuid AS $$
+    SELECT cloud_id FROM snapshots WHERE id = $1;
+$$ LANGUAGE sql;
+
+-- Insert test_age record if one doesn't already exist (first param is snaphot_id, second is test name)
+CREATE OR REPLACE FUNCTION age_test(uuid, character varying(4000), OUT test_age_id uuid) AS $$
+BEGIN
+    INSERT INTO test_age(cloud_id, test_name) VALUES (cloud_get_id($1), $2)
+        ON CONFLICT (cloud_id, test_name) DO NOTHING
+        RETURNING id INTO test_age_id;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Create snapshot or update if one exists
 CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
 BEGIN
@@ -164,6 +192,7 @@ $$ LANGUAGE plpgsql;
 -- Add a test to the snapshot
 CREATE OR REPLACE FUNCTION test_add(uuid, integer, character varying(4000), integer, integer, integer, OUT test_id uuid) AS $$
 BEGIN
+    PERFORM age_test($1, $3);
     INSERT INTO tests(snapshot_id, rank, test_name, age, failures_last7d, passes_last7d) VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id INTO test_id;
 END;
