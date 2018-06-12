@@ -59,7 +59,8 @@ CREATE TABLE public.snapshots (
     lab_issues bigint,
     orchestration_issues bigint,
     scripting_issues bigint,
-    UNIQUE (cloud_id, snapshot_date)
+    unknowns bigint,
+  UNIQUE (cloud_id, snapshot_date)
 );
 
 COMMENT ON COLUMN public.snapshots.cloud_id IS 'Foreign key to cloud';
@@ -67,6 +68,7 @@ COMMENT ON COLUMN public.snapshots.success_rate IS 'Success rate for last 24 hou
 COMMENT ON COLUMN public.snapshots.lab_issues IS 'The number of script failures due to device or browser issues in the lab over the last 24 hours';
 COMMENT ON COLUMN public.snapshots.orchestration_issues IS 'The number of script failures due to attempts to use the same device';
 COMMENT ON COLUMN public.snapshots.scripting_issues IS 'The number of script failures due to a problem with the script or framework over the past 24 hours';
+COMMENT ON COLUMN public.snapshots.unknowns IS 'The number of unknown scripts over the past 24 hours';
 
 CREATE TABLE public.devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -143,12 +145,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create snapshot or update if one exists
-CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
+CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
 BEGIN
-    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues)
-        VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues,unknowns)
+        VALUES ($1, $2, $3, $4, $5, $6 ,$7)
             ON CONFLICT (cloud_id, snapshot_date)
-                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6
+                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6,unknowns=$7
             RETURNING id INTO snapshot_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -180,7 +182,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
 DECLARE
     cloud_id uuid := cloud_upsert('acme.perfectomobile.com');
-    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30);
+    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30,12);
 BEGIN
     PERFORM device_add(snapshot_id, 1, 'iPhone-5S', 'iOS 9.2.1', '544cc6c6026af23c11f5ed6387df5d5f724f60fb', 0, 25, 10);
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
@@ -212,7 +214,8 @@ CREATE VIEW clouds_snapshots AS
         (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
         orchestration_issues,
-        scripting_issues
+        scripting_issues,
+        unknowns
     FROM clouds
     INNER JOIN
         snapshots ON clouds.id = snapshots.cloud_id;
@@ -223,7 +226,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshots(character varying(255), date) RETURNS 
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
             success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab, orchestration_issues AS orchestration,
-            scripting_issues AS scripting,
+            scripting_issues AS scripting, unknowns,
             (
                 SELECT array_to_json(array_agg(row_to_json(r)))
                 FROM (
