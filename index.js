@@ -7,7 +7,7 @@ app.get('/', (req, res) => {
   client.connect('postgresql://postgres@localhost:5432/vr', (err) => {
     if (err) throw err
     client.query("SELECT cloudSnapshots('acme.perfectomobile.com', '2018-06-12'::DATE)", (err, rows)=> {
-      res.send(rows)
+      res.send(rows[0])
     })
   })
   
