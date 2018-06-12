@@ -250,7 +250,7 @@ CREATE VIEW clouds_snapshots AS
         snapshots ON clouds.id = snapshots.cloud_id;
 
 -- Return a complete snapshot for a cloud on a particular date in JSON format
-CREATE OR REPLACE FUNCTION cloudSnapshots(character varying(255), date) RETURNS json AS $$
+CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS json AS $$
     SELECT row_to_json(s) FROM (
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
@@ -293,4 +293,4 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
 SELECT populate_test_data();
 
 -- Show what the JSON looks like
-SELECT cloudSnapshots('acme.perfectomobile.com', '2018-06-12'::DATE);
+SELECT cloudSnapshot('acme.perfectomobile.com', '2018-06-12'::DATE);
