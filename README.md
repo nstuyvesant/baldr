@@ -37,19 +37,13 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Backlog
 
-1. Iterate through array of clouds to merge each element with [report.html](https://github.com/nstuyvesant/baldr/blob/master/report.html)
+1. Ran and Uzi to write their summaries to vr database daily (cron)
 
-2. Generate PDF from each using [pdfkit](https://github.com/devongovett/pdfkit)
+2. Handle fqdn and date parameters for HTTP GET in index.js or rewrite as PHP
 
-3. Email PDF to list of addresses in __emailRecipients__ property using [nodemailer](https://nodemailer.com)
+3. Modify report.html to handle fqdn and date querystring params and $.get() to get JSON from REST service
 
-4. Create bash shell script [generate-baldr-reports.sh](https://github.com/nstuyvesant/baldr/blob/master/generate-baldr-reports.sh) to start node and request [http://localhost:3000](http://localhost:3000) via curl once a day using cron
-
-5. Adapt everything to run on Ubuntu (not much effort needed - mainly date command parameters in bash shell script)
-
-6. Ran and Uzi to update vr database daily with their tools
-
-7. Maybe get rid of ExpressJS since this isn't really a web server
+4. Tzvika to add hyperlink to Digitalzoom that passes MCM FQDN and current date to report.html
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
