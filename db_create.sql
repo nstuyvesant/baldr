@@ -208,8 +208,8 @@ CREATE VIEW clouds_snapshots AS
         snapshots.id AS snapshot_id,
         snapshot_date,
         success_rate,
-        (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '7 days') AS success_last7d,
-        (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '14 days') AS success_last14d,
+        (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '7 days')::bigint AS success_last7d,
+        (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
         orchestration_issues,
         scripting_issues
@@ -236,7 +236,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshots(character varying(255), date) RETURNS 
             (
                 SELECT array_to_json(array_agg(row_to_json(d)))
                 FROM (
-                    SELECT rank, model, os, device_id AS id, errors_last24h AS errors
+                    SELECT rank, model, os, device_id AS id, passed_executions_last24h AS passed, failed_executions_last24h AS failed, errors_last24h AS errors
                     FROM devices
                     WHERE devices.snapshot_id = clouds_snapshots.snapshot_id
                     ORDER BY rank ASC

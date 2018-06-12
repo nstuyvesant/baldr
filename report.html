@@ -149,115 +149,130 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js" integrity="sha256-XF29CBwU1MWLaGEnsELogU6Y6rcc5nCkhhx89nFMIDQ=" crossorigin="anonymous"></script>
     <script>
         const reportData = {
-            fqdn: 'acme.perfectomobile.com',
-            snapshotDate: '2018-06-07',
-            last24h: 37,
-            last7d: 72,
-            last30d: 55,
-            lab: 10,
-            orchestration: 20,
-            scripting: 30,
-            recommendations: [
-                {
-                    rank: 1,
-                    recommendation: 'Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors',
-                    impact: 30
-                },
-                {
-                    rank: 2,
-                    recommendation: 'Use smart check for busy devices',
-                    impact: 15
-                },
-                {
-                    rank: 3,
-                    recommendation: 'Remediate TransferMoney test',
-                    impact: 12
-                },
-                {
-                    rank: 4,
-                    recommendation: 'XPath /bookstore/book[1]/title is broken (affects 30 tests)',
-                    impact: 6
-                },
-                {
-                    rank: 5,
-                    recommendation: 'Ensure tests use Digitalzoom API',
-                    impactMessage: 'Eliminate 720 Unknowns'
-                }
-            ],
-            topProblematicDevices: [
-                {
-                    rank: 1,
-                    model: 'iPhone-5S',
-                    os: 'iOS 9.2.1',
-                    id: '544cc6c6026af23c11f5ed6387df5d5f724f60fb',
-                    errors: 494
-                },
-                {
-                    rank: 2,
-                    model: 'Galaxy S5',
-                    os: 'Android 4.4',
-                    id: 'B5DED881',
-                    errors: 397
-                },
-                {
-                    rank: 3,
-                    model: 'Galaxy Note III',
-                    os: 'Android 5.0',
-                    id: '61F1BF00',
-                    errors: 303
-                },
-                {
-                    rank: 4,
-                    model: 'Nexus 5',
-                    os: 'Android 5.0',
-                    id: '06B25936007418BB',
-                    errors: 298
-                },
-                {
-                    rank: 5,
-                    model: 'iPhone-6',
-                    os: 'iOS 9.1',
-                    id: '8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89',
-                    errors: 147
-                }
-            ],
-            topFailingTests: [
-                {
-                    rank: 1,
-                    test: 'TransferMoney',
-                    age: 230,
-                    failures: 75,
-                    passes: 0
-                },
-                {
-                    rank: 2,
-                    test: 'FindBranch',
-                    age: 200,
-                    failures: 71,
-                    passes: 3
-                },
-                {
-                    rank: 3,
-                    test: 'HonkHorn',
-                    age: 4,
-                    failures: 68,
-                    passes: 13
-                },
-                {
-                    rank: 4,
-                    test: 'InsuranceSearch',
-                    age: 47,
-                    failures: 7,
-                    passes: 0
-                },
-                {
-                    rank: 5,
-                    test: 'RemoteStart',
-                    age: 132,
-                    failures: 41,
-                    passes: 25
-                }
-            ]
+          fqdn: 'acme.perfectomobile.com',
+          snapshotDate: '2018-06-12',
+          last24h: 37,
+          last7d: 37,
+          last14d: 37,
+          lab: 10,
+          orchestration: 20,
+          scripting: 30,
+          recommendations: [
+            {
+              rank: 1,
+              recommendation: 'Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors',
+              impact: 30,
+              impactMessage: null
+            },
+            {
+              rank: 2,
+              recommendation: 'Use smart check for busy devices',
+              impact: 15,
+              impactMessage: null
+            },
+            {
+              rank: 3,
+              recommendation: 'Remediate TransferMoney test',
+              impact: 12,
+              impactMessage: null
+            },
+            {
+              rank: 4,
+              recommendation: 'XPath /bookstore/book[1]/title is broken (affects 30 tests)',
+              impact: 6,
+              impactMessage: null
+            },
+            {
+              rank: 5,
+              recommendation: 'Ensure tests use Digitalzoom API',
+              impact: 0,
+              impactMessage: 'Eliminate 720 Unknowns'
+            }
+          ],
+          topProblematicDevices: [
+            {
+              rank: 1,
+              model: 'iPhone-5S',
+              os: 'iOS 9.2.1',
+              id: '544cc6c6026af23c11f5ed6387df5d5f724f60fb',
+              passed: 0,
+              failed: 25,
+              errors: 10
+            },
+            {
+              rank: 2,
+              model: 'Galaxy S5',
+              os: 'Android 5.0',
+              id: 'B5DED881',
+              passed: 0,
+              failed: 23,
+              errors: 23
+            },
+            {
+              rank: 3,
+              model: 'Galaxy Note III',
+              os: 'Android 4.4',
+              id: '61F1BF00',
+              passed: 1,
+              failed: 15,
+              errors: 10
+            },
+            {
+              rank: 4,
+              model: 'Nexus 5',
+              os: 'Android 5.0',
+              id: '06B25936007418BB',
+              passed: 2,
+              failed: 13,
+              errors: 9
+            },
+            {
+              rank: 5,
+              model: 'iPhone-6',
+              os: 'iOS 9.1',
+              id: '8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89',
+              passed: 2,
+              failed: 12,
+              errors: 8
+            }
+          ],
+          topFailingTests: [
+            {
+              rank: 1,
+              test: 'TransferMoney',
+              age: 230,
+              failures: 75,
+              passes: 0
+            },
+            {
+              rank: 2,
+              test: 'FindBranch',
+              age: 200,
+              failures: 71,
+              passes: 3
+            },
+            {
+              rank: 3,
+              test: 'HonkHorn',
+              age: 4,
+              failures: 68,
+              passes: 13
+            },
+            {
+              rank: 4,
+              test: 'InsuranceSearch',
+              age: 47,
+              failures: 7,
+              passes: 0
+            },
+            {
+              rank: 5,
+              test: 'RemoteStart',
+              age: 132,
+              failures: 41,
+              passes: 25
+            }
+          ]
         }
         const ctx = $('#myChart')
         const chartData = {
