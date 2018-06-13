@@ -61,7 +61,7 @@ CREATE TABLE public.test_age (
     UNIQUE (cloud_id, test_name)
 );
 
-COMMENT ON COLUMN public.test_age.cloud_id IS 'Foreign key to  cloud';
+COMMENT ON COLUMN public.test_age.cloud_id IS 'Foreign key to cloud';
 COMMENT ON COLUMN public.test_age.first_seen IS 'First date we saw that test';
 
 CREATE TABLE public.snapshots (
@@ -215,7 +215,7 @@ BEGIN
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
     PERFORM device_add(snapshot_id, 3, 'Galaxy Note III', 'Android 4.4', '61F1BF00', 1, 15, 10);
     PERFORM device_add(snapshot_id, 4, 'Nexus 5', 'Android 5.0', '06B25936007418BB', 2, 13, 9);
-    PERFORM device_add(snapshot_id, 5, 'iPhone-6', 'iOS 9.1', '8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89',2, 12, 8);
+    PERFORM device_add(snapshot_id, 5, 'iPhone-6', 'iOS 9.1', '8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89', 2, 12, 8);
     PERFORM test_add(snapshot_id, 1, 'TransferMoney', 75, 0);
     PERFORM test_add(snapshot_id, 2, 'FindBranch', 71, 3);
     PERFORM test_add(snapshot_id, 3, 'HonkHorn', 68, 13);
