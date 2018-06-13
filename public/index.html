@@ -179,15 +179,17 @@
 
         // DOM ready
         $(document).ready(function () {
+            // Get cloud and date values from querystring
             let cloud = qs('cloud')
             let snapshotDate = qs('date')
 
-            $('#alertCloud').text(cloud)
-            $('#alertSnapshotDate').text(snapshotDate)
+
 
             // Load content from our API
             $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate, function (reportData) {
+                // Show main report (hidden in case we need to show alert due to no data)
                 $('#main').collapse('show')
+
                 // Setup chart variable
                 const ctx = $('#myChart')
 
@@ -224,32 +226,31 @@
                         duration: 500,
                         easing: 'easeOutQuart',
                         onComplete: function () {
-                        var ctx = this.chart.ctx
-                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontFamily, 'normal', Chart.defaults.global.defaultFontFamily)
-                        ctx.textAlign = 'center'
-                        ctx.textBaseline = 'bottom'
+                            var ctx = this.chart.ctx
+                            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontFamily, 'normal', Chart.defaults.global.defaultFontFamily)
+                            ctx.textAlign = 'center'
+                            ctx.textBaseline = 'bottom'
 
-                        this.data.datasets.forEach(function (dataset) {
+                            this.data.datasets.forEach(function (dataset) {
+                                for (let i = 0; i < dataset.data.length; i++) {
+                                    let model = dataset._meta[Object.keys(dataset._meta)[0]].data[i]._model,
+                                        total = dataset._meta[Object.keys(dataset._meta)[0]].total,
+                                        mid_radius = model.innerRadius + (model.outerRadius - model.innerRadius)/2,
+                                        start_angle = model.startAngle,
+                                        end_angle = model.endAngle,
+                                        mid_angle = start_angle + (end_angle - start_angle)/2
 
-                            for (let i = 0; i < dataset.data.length; i++) {
-                                let model = dataset._meta[Object.keys(dataset._meta)[0]].data[i]._model,
-                                    total = dataset._meta[Object.keys(dataset._meta)[0]].total,
-                                    mid_radius = model.innerRadius + (model.outerRadius - model.innerRadius)/2,
-                                    start_angle = model.startAngle,
-                                    end_angle = model.endAngle,
-                                    mid_angle = start_angle + (end_angle - start_angle)/2
+                                    let x = mid_radius * Math.cos(mid_angle)
+                                    let y = mid_radius * Math.sin(mid_angle)
 
-                                let x = mid_radius * Math.cos(mid_angle)
-                                let y = mid_radius * Math.sin(mid_angle)
+                                    ctx.fillStyle = '#000'
 
-                                ctx.fillStyle = '#000'
-
-                                let percent = String(Math.round(dataset.data[i]/total*100)) + '%'
-                                ctx.fillText(dataset.data[i], model.x + x, model.y + y)
-                                // Display percent in another line, line break doesn't work for fillText
-                                ctx.fillText(percent, model.x + x, model.y + y + 15)
-                            }
-                        })
+                                    let percent = String(Math.round(dataset.data[i]/total*100)) + '%'
+                                    ctx.fillText(dataset.data[i], model.x + x, model.y + y)
+                                    // Display percent in another line, line break doesn't work for fillText
+                                    ctx.fillText(percent, model.x + x, model.y + y + 15)
+                                }
+                            })
                         }
                     }
                 }
@@ -271,6 +272,8 @@
                 let totalImpact = 0
                 let tableRow = ''
                 let impactText = ''
+
+                // Create table of recommendations
                 for (let index in reportData.recommendations) {
                     let recommendation = reportData.recommendations[index]
                     if (recommendation.impact) {
@@ -282,22 +285,27 @@
                     tableRow = '<tr><th scope="row">' + recommendation.rank + '</th><td>' + recommendation.recommendation + '</td><td class="green">' + impactText + '</td></tr>'
                     $('#recommendationsTable > tbody:last-child').append(tableRow)
                 }
+
+                // Create table of problematic devices
                 $('#totalImpact').text(totalImpact)
                 for (let index in reportData.topProblematicDevices) {
                     let problematicDevice = reportData.topProblematicDevices[index]
                     tableRow = '<tr><th scope="row">' + problematicDevice.rank + '</th><td>' + problematicDevice.model + '</td><td>' + problematicDevice.os + '</td><td>' + problematicDevice.id + '</td><td>' + problematicDevice.errors + '</td></tr>'
                     $('#devicesTable > tbody:last-child').append(tableRow)
                 }
+
+                // Create table of problematic tests
                 for (let index in reportData.topFailingTests) {
                     let test = reportData.topFailingTests[index]
                     tableRow = '<tr><th scope="row">' + test.rank + '</th><td>' + test.test + '</td><td>' + test.age + 'd</td><td>' + test.failures + '</td><td>' + test.passes + '</td></tr>'
                     $('#testsTable > tbody:last-child').append(tableRow)
                 }
             }) // Get JSON
-            .fail(function() {
+            .fail(function() { // Handle no data for cloud/date combination
+                // Set alert message
                 $('#alertCloud').text(cloud)
                 $('#alertSnapshotDate').text(snapshotDate)
-                $('#noData').collapse('show')
+                $('#noData').collapse('show') // show alert
             })
         }) // DOM read
     </script>
