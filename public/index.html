@@ -183,8 +183,6 @@
             let cloud = qs('cloud')
             let snapshotDate = qs('date')
 
-
-
             // Load content from our API
             $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate, function (reportData) {
                 // Show main report (hidden in case we need to show alert due to no data)
