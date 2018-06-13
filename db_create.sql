@@ -275,7 +275,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
             (
                 SELECT array_to_json(array_agg(row_to_json(t)))
                 FROM (
-                    SELECT rank, tests.test_name AS test, DATE_PART('day', CURRENT_DATE) - DATE_PART('day', first_seen) AS age::integer, failures_last7d AS failures, passes_last7d as passes
+                    SELECT rank, tests.test_name AS test, DATE_PART('day', CURRENT_DATE) - DATE_PART('day', first_seen) AS age, failures_last7d AS failures, passes_last7d as passes
                     FROM tests INNER JOIN test_age ON tests.test_name = test_age.test_name
                     WHERE tests.snapshot_id = clouds_snapshots.snapshot_id
                     ORDER BY rank ASC
