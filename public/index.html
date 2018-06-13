@@ -45,7 +45,10 @@
     <!--[if lt IE 10]>
       <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
-    <div class="container">
+    <div id="noData" class="alert alert-danger collapse" role="alert">
+        No snapshot found for cloud = <span id="alertCloud"></span>, date = <span id="alertSnapshotDate"></span>
+    </div>
+    <div id="main" class="container collapse">
         <img src="perfecto-logo.svg" class="logo" />
         <div class="row">
             <div class="col-md-6">
@@ -148,8 +151,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha256-C8oQVJ33cKtnkARnmeWp6SDChkU+u7KvsNMFUzkkUzk=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js" integrity="sha256-XF29CBwU1MWLaGEnsELogU6Y6rcc5nCkhhx89nFMIDQ=" crossorigin="anonymous"></script>
     <script>
-        let reportData
-
         // Extract querystring values
         function qs (key) {
         key = key.replace(/[*+?^$.[\]{}()|\\/]/g, '\\$&') // escape RegEx meta chars
@@ -157,6 +158,7 @@
         return match && decodeURIComponent(match[1].replace(/\+/g, ' '))
         }
 
+        // Extend jQuery to color code success rate values
         jQuery.fn.extend({
             colorCode: function () {
                 return this.each(function() {
@@ -177,13 +179,15 @@
 
         // DOM ready
         $(document).ready(function () {
-            let fqdn = qs('fqdn')
+            let cloud = qs('cloud')
             let snapshotDate = qs('date')
 
-            // Load content from our API
-            $.getJSON('http://localhost:3000/cloud/' + fqdn + '?date=' + snapshotDate, function (data) {
-                reportData = data // pass response to our global
+            $('#alertCloud').text(cloud)
+            $('#alertSnapshotDate').text(snapshotDate)
 
+            // Load content from our API
+            $.getJSON('http://localhost:3000/api/?cloud=' + cloud + '&date=' + snapshotDate, function (reportData) {
+                $('#main').collapse('show')
                 // Setup chart variable
                 const ctx = $('#myChart')
 
@@ -290,6 +294,11 @@
                     $('#testsTable > tbody:last-child').append(tableRow)
                 }
             }) // Get JSON
+            .fail(function() {
+                $('#alertCloud').text(cloud)
+                $('#alertSnapshotDate').text(snapshotDate)
+                $('#noData').collapse('show')
+            })
         }) // DOM read
     </script>
 </body>

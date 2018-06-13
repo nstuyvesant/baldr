@@ -13,17 +13,16 @@ app.get('/perfecto-logo.svg', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'public/perfecto-logo.svg'));
 });
 
-// Simple API - test using http://localhost:3000/cloud/acme.perfectomobile.com?date=2018-06-12
-app.get('/cloud/:id', (req, res, next) => {
+// Simple API - test using http://localhost:3000/api/?cloud=acme.perfectomobile.com?date=2018-06-12
+app.get('/api/', (req, res, next) => {
   let client = new Client()
-  let cloudId = req.params.id
+  let cloud = req.query.cloud
   let snapshotDate = req.query.date
   client.connect(pgConnectionString, (err) => {
     if (err) throw err
-    // TODO: Later, change this to pass uuid for cloud instead of fqdn (for security reasons)
-    // TODO: As a best practice, we should prevent SQL injection
-    let sql = `SELECT cloudSnapshot('${cloudId}', '${snapshotDate}'::DATE)`
-    client.query(sql, (err, rows)=> {
+    // TODO: Change cloud to pass uuid instead of fqdn to improve privacy
+    let sql = `SELECT cloudSnapshot($1, $2::DATE)` // parameterized to prevent SQL injection
+    client.query(sql, [cloud, snapshotDate], (err, rows)=> {
       if (err) throw err
       res.send(rows[0].cloudsnapshot)
     })

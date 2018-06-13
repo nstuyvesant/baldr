@@ -27,7 +27,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data
 
-6. Type `npm start` then go to [http://localhost:3000](http://localhost:3000) to see the JSON output. This is an initial step. See __Backlog__ below.
+6. Type `npm start` then go to [http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12) to see report. To view the JSON, go to [http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12).
 
 ### Overview of files
 
@@ -37,9 +37,9 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Backlog
 
-1. Ran and Uzi to write their summaries to vr database daily (cron)
+1. Ran and Uzi to write their summaries to vr database daily (cron on opsportal)
 
-2. Handle uuid and date parameters for HTTP GET in index.js or rewrite as PHP
+2. Replace use of FQDN with UUID to improve security
 
 3. Tzvika to add hyperlink to Digitalzoom that passes MCM FQDN and current date to report.html
 
