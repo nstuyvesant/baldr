@@ -186,7 +186,7 @@
             $('#alertSnapshotDate').text(snapshotDate)
 
             // Load content from our API
-            $.getJSON('http://localhost:3000/api/?cloud=' + cloud + '&date=' + snapshotDate, function (reportData) {
+            $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate, function (reportData) {
                 $('#main').collapse('show')
                 // Setup chart variable
                 const ctx = $('#myChart')
