@@ -150,6 +150,13 @@
     <script>
         let reportData
 
+        // Extract querystring values
+        function qs (key) {
+        key = key.replace(/[*+?^$.[\]{}()|\\/]/g, '\\$&') // escape RegEx meta chars
+        let match = location.search.match(new RegExp('[?&]' + key + '=([^&]+)(&|$)'))
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' '))
+        }
+
         jQuery.fn.extend({
             colorCode: function () {
                 return this.each(function() {
@@ -170,8 +177,11 @@
 
         // DOM ready
         $(document).ready(function () {
+            let fqdn = qs('fqdn')
+            let snapshotDate = qs('date')
+
             // Load content from our API
-            $.getJSON('http://localhost:3000/cloud/acme.perfectomobile.com?date=2018-06-12', function (data) {
+            $.getJSON('http://localhost:3000/cloud/' + fqdn + '?date=' + snapshotDate, function (data) {
                 reportData = data // pass response to our global
 
                 // Setup chart variable
@@ -247,6 +257,7 @@
                     options: chartOptions
                 })
 
+                // Fill in UI
                 $('#fqdn').text(reportData.fqdn)
                 $('#snapshotDate').text(reportData.snapshotDate)
                 $('#last24h').text(reportData.last24h)
@@ -278,8 +289,8 @@
                     tableRow = '<tr><th scope="row">' + test.rank + '</th><td>' + test.test + '</td><td>' + test.age + 'd</td><td>' + test.failures + '</td><td>' + test.passes + '</td></tr>'
                     $('#testsTable > tbody:last-child').append(tableRow)
                 }
-            })          
-        })
+            }) // Get JSON
+        }) // DOM read
     </script>
 </body>
 
