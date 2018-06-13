@@ -39,13 +39,9 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 1. Ran and Uzi to write their summaries to vr database daily (cron)
 
-2. Remove tests.age and modify cloudSnapshot() to use this query
+2. Handle uuid and date parameters for HTTP GET in index.js or rewrite as PHP
 
-3. Handle uuid and date parameters for HTTP GET in index.js or rewrite as PHP
-
-4. Modify report.html to handle fqdn and date querystring params and $.get() to get JSON from REST service
-
-5. Tzvika to add hyperlink to Digitalzoom that passes MCM FQDN and current date to report.html
+3. Tzvika to add hyperlink to Digitalzoom that passes MCM FQDN and current date to report.html
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
