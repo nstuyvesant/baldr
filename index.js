@@ -4,7 +4,7 @@ const app = express()
 const path = require('path')
 const pgConnectionString = 'postgresql://postgres@localhost:5432/vr'
 
-// Generic HTTP GET uses /public for static content
+// Generic HTTP GET uses /public for static content - test using localhost:3000/?fqdn=acme.perfectomobile.com&date=2018-06-12
 app.get('/', express.static(path.join(__dirname, 'public')))
 
 // Pass logo explicitly with correct MIME type
