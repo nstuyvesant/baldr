@@ -33,15 +33,17 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 - [db_create.sql](https://github.com/nstuyvesant/baldr/blob/master/db_create.sql) - Creates the PostgreSQL database, functions to generate JSON and populates with sample data
 
-- [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Brief example of [ExpressJS](http://expressjs.com) with [pg-native](https://github.com/brianc/node-pg-native) to pass current date to get JSON array of clouds and display on page. See Backlog for next steps.
+- [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Web server using [ExpressJS](http://expressjs.com) with [pg-native](https://github.com/brianc/node-pg-native) to serve the finished report and the API that generates JSON for it
 
 ### Backlog
 
-1. Ran and Uzi to write their summaries to vr database daily (cron on opsportal)
+1. Ran and Uzi to write records to vr database daily using PostgreSQL functions: cloud_upsert(), snapshot_add(), device_add(), test_add(), recommendation_add()
 
-2. Replace use of FQDN with UUID to improve security
+2. Replace use of FQDN with UUID in PostgreSQL function cloudSnapshot() to improve security (give list of UUIDs to Michael)
 
-3. Tzvika to add hyperlink to Digitalzoom that passes MCM FQDN and current date to report.html
+3. Establish FQDN and SSL certificate for this server on AWS
+
+4. Tzvika to have Michael add hyperlink to Digitalzoom that passes UUID for MCM and current date (ISO 8601 format) to appropriate URL
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
