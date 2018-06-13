@@ -127,7 +127,6 @@ CREATE TABLE public.tests (
     snapshot_id uuid NOT NULL REFERENCES snapshots(id),
     rank smallint DEFAULT 1 NOT NULL,
     test_name character varying(4000) NOT NULL,
-    age bigint NOT NULL,
     failures_last7d bigint NOT NULL,
     passes_last7d bigint NOT NULL,
     UNIQUE (snapshot_id, rank)
@@ -136,7 +135,6 @@ CREATE TABLE public.tests (
 COMMENT ON COLUMN public.tests.snapshot_id IS 'Foreign key to snapshot record';
 COMMENT ON COLUMN public.tests.rank IS 'Report ranking of the importance of the problematic test';
 COMMENT ON COLUMN public.tests.test_name IS 'Name of the test having issues';
-COMMENT ON COLUMN public.tests.age IS 'How many days Digitalzoom has known about this test (used to select out tests that are newly created)';
 COMMENT ON COLUMN public.tests.failures_last7d IS 'Number of failures of the test for the last 7 days';
 COMMENT ON COLUMN public.tests.passes_last7d IS 'The number of times the test has passed over the last 7 days';
 
@@ -192,10 +190,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Add a test to the snapshot
-CREATE OR REPLACE FUNCTION test_add(uuid, integer, character varying(4000), integer, integer, integer, OUT test_id uuid) AS $$
+CREATE OR REPLACE FUNCTION test_add(uuid, integer, character varying(4000), integer, integer, OUT test_id uuid) AS $$
 BEGIN
     PERFORM age_test($1, $3);
-    INSERT INTO tests(snapshot_id, rank, test_name, age, failures_last7d, passes_last7d) VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO tests(snapshot_id, rank, test_name, failures_last7d, passes_last7d) VALUES ($1, $2, $3, $4, $5)
         RETURNING id INTO test_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -217,12 +215,12 @@ BEGIN
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
     PERFORM device_add(snapshot_id, 3, 'Galaxy Note III', 'Android 4.4', '61F1BF00', 1, 15, 10);
     PERFORM device_add(snapshot_id, 4, 'Nexus 5', 'Android 5.0', '06B25936007418BB', 2, 13, 9);
-    PERFORM device_add(snapshot_id, 5, 'iPhone-6', 'iOS 9.1', '8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89', 2, 12, 8);
-    PERFORM test_add(snapshot_id, 1, 'TransferMoney', 230, 75, 0);
-    PERFORM test_add(snapshot_id, 2, 'FindBranch', 200, 71, 3);
-    PERFORM test_add(snapshot_id, 3, 'HonkHorn', 4, 68, 13);
-    PERFORM test_add(snapshot_id, 4, 'InsuranceSearch', 47, 7, 0);
-    PERFORM test_add(snapshot_id, 5, 'RemoteStart', 132, 41, 25);
+    PERFORM device_add(snapshot_id, 5, 'iPhone-6', 'iOS 9.1', '8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89',2, 12, 8);
+    PERFORM test_add(snapshot_id, 1, 'TransferMoney', 75, 0);
+    PERFORM test_add(snapshot_id, 2, 'FindBranch', 71, 3);
+    PERFORM test_add(snapshot_id, 3, 'HonkHorn', 68, 13);
+    PERFORM test_add(snapshot_id, 4, 'InsuranceSearch', 7, 0);
+    PERFORM test_add(snapshot_id, 5, 'RemoteStart', 41, 25);
     PERFORM recommendation_add(snapshot_id, 1, 'Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors', 30, NULL);
     PERFORM recommendation_add(snapshot_id, 2, 'Use smart check for busy devices', 15, NULL);
     PERFORM recommendation_add(snapshot_id, 3, 'Remediate TransferMoney test', 12, NULL);
@@ -277,8 +275,8 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
             (
                 SELECT array_to_json(array_agg(row_to_json(t)))
                 FROM (
-                    SELECT rank, test_name AS test, age, failures_last7d AS failures, passes_last7d as passes
-                    FROM tests
+                    SELECT rank, tests.test_name AS test, DATE_PART('day', CURRENT_DATE) - DATE_PART('day', first_seen) AS age::integer, failures_last7d AS failures, passes_last7d as passes
+                    FROM tests INNER JOIN test_age ON tests.test_name = test_age.test_name
                     WHERE tests.snapshot_id = clouds_snapshots.snapshot_id
                     ORDER BY rank ASC
                 ) t
