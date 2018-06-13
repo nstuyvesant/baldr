@@ -25,7 +25,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 4. Type `brew services start postgresql` to start PostgreSQL (if not already running)
 
-5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data
+5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called acme.perfectomobile.com with a snapshot for 2018-06-12
 
 6. Type `npm start` then go to [http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12) to see report. To view the JSON, go to [http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12).
 
