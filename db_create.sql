@@ -205,8 +205,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Parse JSON and populate data
--- 
+-- TODO: Add function that parses JSON and populates data
+-- https://www.postgresql.org/docs/10/static/functions-json.html
 
 -- Load test data dependencies
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
@@ -290,8 +290,10 @@ $$ LANGUAGE sql;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres; 
 
--- Run the function to populate the date
+-- Run the function to populate the date inside a transaction
+BEGIN;
 SELECT populate_test_data();
+COMMIT;
 
 -- Show what the JSON looks like
 SELECT cloudSnapshot('acme.perfectomobile.com', '2018-06-12'::DATE);
