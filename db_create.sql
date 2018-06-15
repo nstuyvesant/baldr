@@ -127,8 +127,8 @@ CREATE TABLE public.tests (
     snapshot_id uuid NOT NULL REFERENCES snapshots(id),
     rank smallint DEFAULT 1 NOT NULL,
     test_name character varying(4000) NOT NULL,
-    failures_last7d bigint NOT NULL,
-    passes_last7d bigint NOT NULL,
+    failures_last24h bigint NOT NULL,
+    passes_last24h bigint NOT NULL,
     UNIQUE (snapshot_id, rank)
 );
 
