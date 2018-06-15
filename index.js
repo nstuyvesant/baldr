@@ -18,14 +18,23 @@ app.get('/api/', (req, res, next) => {
   let client = new Client()
   let cloud = req.query.cloud
   let snapshotDate = req.query.date
-  client.connect(pgConnectionString, (err) => {
-    if (err) throw err
-    let sql = `SELECT cloudSnapshot($1, $2::DATE)` // parameterized to prevent SQL injection
-    client.query(sql, [cloud, snapshotDate], (err, rows)=> {
-      if (err) throw err
-      res.send(rows[0].cloudsnapshot)
+  let missingParams = cloud && snapshotDate
+  if (!missingParams) {
+    client.connect(pgConnectionString, (err) => {
+      if (err) {
+        res.status(502).send('Not able to connect to database to retrieve snapshot.')
+        return
+      }
+      let sql = `SELECT cloudSnapshot($1, $2::DATE)` // parameterized to prevent SQL injection
+      client.query(sql, [cloud, snapshotDate], (err, rows)=> {
+        if (err) {
+          res.status(503).send('Not able to retrieve snapshot from database (connected successfully).')
+          return
+        }
+        res.send(rows[0].cloudsnapshot)
+      })
     })
-  })
+  } else res.status(501).send('Missing parameter(s): cloud and date are required.')
 })
 
 app.listen(3000, () => console.log('Baldr listening on port 3000.'))
