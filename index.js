@@ -18,7 +18,7 @@ app.get('/api/', (req, res, next) => {
   let client = new Client()
   let cloud = req.query.cloud
   let snapshotDate = req.query.date
-  let missingParams = cloud && snapshotDate
+  let missingParams = !cloud || !snapshotDate
   if (!missingParams) {
     client.connect(pgConnectionString, (err) => {
       if (err) {
