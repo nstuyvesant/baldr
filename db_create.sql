@@ -193,7 +193,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add(uuid, integer, character varying(4000), integer, integer, OUT test_id uuid) AS $$
 BEGIN
     PERFORM age_test($1, $3);
-    INSERT INTO tests(snapshot_id, rank, test_name, failures_last7d, passes_last7d) VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO tests(snapshot_id, rank, test_name, failures_last24h, passes_last24h) VALUES ($1, $2, $3, $4, $5)
         RETURNING id INTO test_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -204,6 +204,9 @@ BEGIN
     INSERT INTO recommendations(snapshot_id, rank, recommendation, impact_percentage, impact_message) VALUES ($1, $2, $3, $4, $5);
 END;
 $$ LANGUAGE plpgsql;
+
+-- Parse JSON and populate data
+-- 
 
 -- Load test data dependencies
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
@@ -275,7 +278,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
             (
                 SELECT array_to_json(array_agg(row_to_json(t)))
                 FROM (
-                    SELECT rank, tests.test_name AS test, DATE_PART('day', CURRENT_DATE) - DATE_PART('day', first_seen) AS age, failures_last7d AS failures, passes_last7d as passes
+                    SELECT rank, tests.test_name AS test, DATE_PART('day', CURRENT_DATE) - DATE_PART('day', first_seen) AS age, failures_last24h AS failures, passes_last24h as passes
                     FROM tests INNER JOIN test_age ON tests.test_name = test_age.test_name
                     WHERE tests.snapshot_id = clouds_snapshots.snapshot_id
                     ORDER BY rank ASC
