@@ -1,0 +1,102 @@
+{
+	"fqdn": "acme.perfectomobile.com",
+	"snapshotDate": "2018-06-12",
+	"last24h": 37,
+	"lab": 10,
+	"orchestration": 20,
+	"scripting": 30,
+	"unknowns": 12,
+	"recommendations": [{
+		"rank": 1,
+		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+		"impact": 30,
+		"impactMessage": null
+	}, {
+		"rank": 2,
+		"recommendation": "Use smart check for busy devices",
+		"impact": 15,
+		"impactMessage": null
+	}, {
+		"rank": 3,
+		"recommendation": "Remediate TransferMoney test",
+		"impact": 12,
+		"impactMessage": null
+	}, {
+		"rank": 4,
+		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+		"impact": 6,
+		"impactMessage": null
+	}, {
+		"rank": 5,
+		"recommendation": "Ensure tests use Digitalzoom API",
+		"impact": 0,
+		"impactMessage": "Eliminate 720 Unknowns"
+	}],
+	"topProblematicDevices": [{
+		"rank": 1,
+		"model": "iPhone-5S",
+		"os": "iOS 9.2.1",
+		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+		"passed": 0,
+		"failed": 25,
+		"errors": 10
+	}, {
+		"rank": 2,
+		"model": "Galaxy S5",
+		"os": "Android 5.0",
+		"id": "B5DED881",
+		"passed": 0,
+		"failed": 23,
+		"errors": 23
+	}, {
+		"rank": 3,
+		"model": "Galaxy Note III",
+		"os": "Android 4.4",
+		"id": "61F1BF00",
+		"passed": 1,
+		"failed": 15,
+		"errors": 10
+	}, {
+		"rank": 4,
+		"model": "Nexus 5",
+		"os": "Android 5.0",
+		"id": "06B25936007418BB",
+		"passed": 2,
+		"failed": 13,
+		"errors": 9
+	}, {
+		"rank": 5,
+		"model": "iPhone-6",
+		"os": "iOS 9.1",
+		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+		"passed": 2,
+		"failed": 12,
+		"errors": 8
+	}],
+	"topFailingTests": [{
+		"rank": 1,
+		"test": "TransferMoney",
+		"failures": 75,
+		"passes": 0
+	}, {
+		"rank": 2,
+		"test": "FindBranch",
+		"failures": 71,
+		"passes": 3
+	}, {
+		"rank": 3,
+		"test": "HonkHorn",
+		"failures": 68,
+		"passes": 13
+	}, {
+		"rank": 4,
+		"test": "InsuranceSearch",
+		"failures": 7,
+		"passes": 0
+	}, {
+		"rank": 5,
+		"test": "RemoteStart",
+		"failures": 41,
+		"passes": 25
+	}]
+}
