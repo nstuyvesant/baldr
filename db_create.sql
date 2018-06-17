@@ -353,7 +353,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
 --   SELECT populate_test_data();
 -- COMMIT;
 
-SELECT snapshot_as_json('
+SELECT json_snapshot_add('
 {
 	"fqdn": "foo.perfectomobile.com",
 	"snapshotDate": "2018-06-17",
