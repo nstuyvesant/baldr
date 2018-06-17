@@ -135,8 +135,8 @@ CREATE TABLE public.tests (
 COMMENT ON COLUMN public.tests.snapshot_id IS 'Foreign key to snapshot record';
 COMMENT ON COLUMN public.tests.rank IS 'Report ranking of the importance of the problematic test';
 COMMENT ON COLUMN public.tests.test_name IS 'Name of the test having issues';
-COMMENT ON COLUMN public.tests.failures_last7d IS 'Number of failures of the test for the last 7 days';
-COMMENT ON COLUMN public.tests.passes_last7d IS 'The number of times the test has passed over the last 7 days';
+COMMENT ON COLUMN public.tests.failures_last24h IS 'Number of failures of the test for the last 7 days';
+COMMENT ON COLUMN public.tests.passes_last24h IS 'The number of times the test has passed over the last 7 days';
 
 -- Add indices
 
@@ -173,10 +173,10 @@ $$ LANGUAGE plpgsql;
 -- Create snapshot or update if one exists
 CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
 BEGIN
-    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues,unknowns)
+    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns)
         VALUES ($1, $2, $3, $4, $5, $6 ,$7)
             ON CONFLICT (cloud_id, snapshot_date)
-                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6,unknowns=$7
+                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns=$7
             RETURNING id INTO snapshot_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -205,14 +205,72 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- TODO: Add function that parses JSON and populates data
--- https://www.postgresql.org/docs/10/static/functions-json.html
+-- Read a snapshot in JSON format
+CREATE OR REPLACE FUNCTION json_snapshot_add(input json, OUT done boolean) AS $$
+DECLARE
+    v_cloud_id uuid := cloud_upsert((input->>'fqdn')::varchar);
+    v_snapshot_id uuid;
+BEGIN
+    v_snapshot_id := snapshot_add(
+        v_cloud_id,
+        (input->>'snapshotDate')::date,
+        (input->>'last24h')::integer, 
+        (input->>'lab')::integer,
+        (input->>'orchestration')::integer,
+        (input->>'scripting')::integer,
+        (input->>'unknowns')::integer
+    );
+    -- Add recommendations
+    WITH r AS (
+        SELECT
+            v_snapshot_id AS snapshot_id,
+            (value->>'rank')::smallint AS rank,
+            (value->>'recommendation')::varchar AS recommendation,
+            (value->>'impact')::integer AS impact_percentage,
+            (value->>'impactMessage')::varchar AS impact_message
+        FROM json_array_elements(input->'recommendations')
+    )
+    INSERT INTO recommendations(snapshot_id, rank, recommendation, impact_percentage, impact_message) SELECT snapshot_id, rank, recommendation, impact_percentage, impact_message FROM r;
+    -- Add devices
+    WITH d AS (
+        SELECT
+            v_snapshot_id AS snapshot_id,
+            (value->>'rank')::smallint AS rank,
+            (value->>'model')::varchar AS model,
+            (value->>'os')::varchar AS os,
+            (value->>'id')::varchar AS device_id,
+            (value->>'passed')::integer AS passed_executions_last24h,
+            (value->>'failed')::integer AS failed_executions_last24h,
+            (value->>'errors')::integer AS errors_last24h
+        FROM json_array_elements(input->'topProblematicDevices')
+    )
+    INSERT INTO
+        devices(snapshot_id, rank, model, os, device_id, passed_executions_last24h, failed_executions_last24h, errors_last24h)
+        SELECT snapshot_id, rank, model, os, device_id, passed_executions_last24h, failed_executions_last24h, errors_last24h FROM d;
+    -- Add tests
+    WITH t AS (
+        SELECT
+            v_snapshot_id AS snapshot_id,
+            (value->>'rank')::smallint AS rank,
+            (value->>'test')::varchar AS test_name,
+            (value->>'failures')::integer AS failures_last24h,
+            (value->>'passes')::integer AS passes_last24h
+        FROM json_array_elements(input->'topFailingTests')
+    )
+    INSERT INTO
+        tests(snapshot_id, rank, test_name, failures_last24h, passes_last24h)
+        SELECT snapshot_id, rank, test_name, failures_last24h, passes_last24h FROM t;
+    -- TODO: update test age since we didn't use test_add() that does it automatically
+    -- Bogus value
+    done := TRUE;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Load test data dependencies
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
 DECLARE
     cloud_id uuid := cloud_upsert('acme.perfectomobile.com');
-    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30,12);
+    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30, 12);
 BEGIN
     PERFORM device_add(snapshot_id, 1, 'iPhone-5S', 'iOS 9.2.1', '544cc6c6026af23c11f5ed6387df5d5f724f60fb', 0, 25, 10);
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
@@ -291,9 +349,114 @@ $$ LANGUAGE sql;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres; 
 
 -- Run the function to populate the date inside a transaction
-BEGIN;
-SELECT populate_test_data();
-COMMIT;
+-- BEGIN;
+--   SELECT populate_test_data();
+-- COMMIT;
+
+SELECT snapshot_as_json('
+{
+	"fqdn": "foo.perfectomobile.com",
+	"snapshotDate": "2018-06-17",
+	"last24h": 37,
+	"lab": 10,
+	"orchestration": 20,
+	"scripting": 30,
+	"unknowns": 12,
+	"recommendations": [{
+		"rank": 1,
+		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+		"impact": 30,
+		"impactMessage": null
+	}, {
+		"rank": 2,
+		"recommendation": "Use smart check for busy devices",
+		"impact": 15,
+		"impactMessage": null
+	}, {
+		"rank": 3,
+		"recommendation": "Remediate TransferMoney test",
+		"impact": 12,
+		"impactMessage": null
+	}, {
+		"rank": 4,
+		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+		"impact": 6,
+		"impactMessage": null
+	}, {
+		"rank": 5,
+		"recommendation": "Ensure tests use Digitalzoom API",
+		"impact": 0,
+		"impactMessage": "Eliminate 720 Unknowns"
+	}],
+	"topProblematicDevices": [{
+		"rank": 1,
+		"model": "iPhone-5S",
+		"os": "iOS 9.2.1",
+		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+		"passed": 0,
+		"failed": 25,
+		"errors": 10
+	}, {
+		"rank": 2,
+		"model": "Galaxy S5",
+		"os": "Android 5.0",
+		"id": "B5DED881",
+		"passed": 0,
+		"failed": 23,
+		"errors": 23
+	}, {
+		"rank": 3,
+		"model": "Galaxy Note III",
+		"os": "Android 4.4",
+		"id": "61F1BF00",
+		"passed": 1,
+		"failed": 15,
+		"errors": 10
+	}, {
+		"rank": 4,
+		"model": "Nexus 5",
+		"os": "Android 5.0",
+		"id": "06B25936007418BB",
+		"passed": 2,
+		"failed": 13,
+		"errors": 9
+	}, {
+		"rank": 5,
+		"model": "iPhone-6",
+		"os": "iOS 9.1",
+		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+		"passed": 2,
+		"failed": 12,
+		"errors": 8
+	}],
+	"topFailingTests": [{
+		"rank": 1,
+		"test": "TransferMoney",
+		"failures": 75,
+		"passes": 0
+	}, {
+		"rank": 2,
+		"test": "FindBranch",
+		"failures": 71,
+		"passes": 3
+	}, {
+		"rank": 3,
+		"test": "HonkHorn",
+		"failures": 68,
+		"passes": 13
+	}, {
+		"rank": 4,
+		"test": "InsuranceSearch",
+		"failures": 7,
+		"passes": 0
+	}, {
+		"rank": 5,
+		"test": "RemoteStart",
+		"failures": 41,
+		"passes": 25
+	}]
+}
+'::json);
 
 -- Show what the JSON looks like
-SELECT cloudSnapshot('acme.perfectomobile.com', '2018-06-12'::DATE);
+--SELECT cloudSnapshot('foo.perfectomobile.com', '2018-06-17'::date);
