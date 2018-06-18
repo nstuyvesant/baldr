@@ -21,13 +21,15 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 2. Make sure prerequisites are installed. If Homebrew was already installed, be sure to run `brew doctor` and address any issues before installing other brew packages.
 
-3. Type `git clone https://github.com/nstuyvesant/baldr.git && cd baldr && npm install` to clone the project and install dependencies
+3. Type `brew services start postgresql` to start PostgreSQL (if not already running)
 
-4. Type `brew services start postgresql` to start PostgreSQL (if not already running)
+4. Type `git clone https://github.com/nstuyvesant/baldr.git` to clone the project
 
-5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called acme.perfectomobile.com with a snapshot for 2018-06-12
+5. Type `cd baldr && npm install` to connect to the directory and install NodeJS dependencies
 
-6. Type `npm install && sudo npm start` (must use sudo npm start on macOS because we're using TCP port 80)
+6. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called acme.perfectomobile.com with a snapshot for 2018-06-12
+
+7. Type `sudo npm start` (must use sudo npm start on macOS because we're using TCP port 80)
 
 ### Testing
 
