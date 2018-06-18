@@ -3,28 +3,33 @@
 
 <head>
     <title>Simple JSON Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha256-NJWeQ+bs82iAeoT5Ktmqbi3NXwxcHlfaVejzJI2dklU=" crossorigin="anonymous" />
 </head>
 
 <body>
-  <form id="theForm" action="/api" method="POST">
-    <textarea id="jsonTest" name="jsonTest" rows="30" style="width:700px"></textarea>
-    <br/>
-    <input type="submit" value="Submit">
-  </form>
+  <div class="container" style="margin-top:30px">
+    <form id="theForm" action="/api" method="POST">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="jsonTest">JSON Snapshot to Upsert</label>
+            <textarea class="form-control" id="jsonTest" name="jsonTest" rows="25"></textarea>
+          </div>
+          <button class="btn btn-success" type="submit">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha256-C8oQVJ33cKtnkARnmeWp6SDChkU+u7KvsNMFUzkkUzk=" crossorigin="anonymous"></script>
   <script>
     // Handle submit on request form
     $('#theForm').on('submit', function (e) {
       e.preventDefault()
-      $.ajax({
-        url: '/api',
-        type: 'POST',
-        data: $('#jsonTest').val(),
-        dataType: 'json',
-        success: function (response) {
-          console.log(response)
-          $('#jsonTest').val(response)
-        }
+      $.post('/api', JSON.parse($('#jsonTest').val()), function (data) {
+        response = JSON.parse(data)
+        if (response.success)
+          alert('Successfully submitted JSON.')
       })
     })
 

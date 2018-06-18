@@ -27,7 +27,15 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called acme.perfectomobile.com with a snapshot for 2018-06-12
 
-6. Type `npm start` then go to [http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12) to see report. To view the JSON, go to [http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12).
+6. Type `npm install && npm start` 
+
+### Testing
+
+1. To see report populated from the database, go to [http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12)
+
+2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12)
+
+3. To experiment submitting JSON to the API, go to [http://localhost:3000/test.html](http://localhost:3000/test.html)
 
 ### Overview of files
 

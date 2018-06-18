@@ -27,7 +27,7 @@ app.get('/api', (req, res, next) => {
       let sql = `SELECT cloudSnapshot($1, $2::DATE)` // parameterized to prevent SQL injection
       client.query(sql, [cloud, snapshotDate], (err, rows)=> {
         if (err) {
-          res.status(503).send('Not able to retrieve snapshot from database (connected successfully).')
+          res.status(503).send('Not able to retrieve snapshot from database (but connected successfully).')
           return
         }
         res.send(rows[0].cloudsnapshot)
@@ -38,11 +38,27 @@ app.get('/api', (req, res, next) => {
 
 app.post('/api', (req, res, next) => {
   if(req.body) {
-    // TODO: extract JSON from req.body and pass to PostgreSQL json_snapshot_upsert()
-    // let client = new Client()
-    // client.connect() then client.query()
-    res.send(req.body) // echo result back
-  } else res.status(504).send('No JSON received.')
+    console.log('Received JSON request.')
+    jsonSnapshot = JSON.stringify(req.body)
+    let client = new Client()
+    client.connect(pgConnectionString, (err) => {
+      if (err) {
+        res.status(502).send('{ "success": false, "message": "Not able to connect to database to submit snapshot."')
+        return
+      }
+      let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
+      client.query(sql, [jsonSnapshot], (err, rows)=> {
+        if (err) {
+          res.status(503).send('{ "success": false, "message": "Not able to submit snapshot to database (but connected successfully)."')
+          return
+        }
+        console.log('Processed JSON request.')
+        res.send('{ "success": true, "message": "JSON received and processed." }')
+      })
+    })
+  } else {
+    res.status(504).send('{ "success": false, "message": "No JSON received." }')
+  }
 })
 
 app.listen(3000, () => console.log('Baldr listening on port 3000.'))
