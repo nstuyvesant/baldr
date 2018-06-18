@@ -1,4 +1,4 @@
--- Meant to be run from PSQL:
+-- Invoke this script via
 -- $ psql -d postgres -f db_create.sql
 
 -- Create user if doesn't exist
