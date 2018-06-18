@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en-US">
+
+<head>
+    <title>Simple JSON Test</title>
+</head>
+
+<body>
+  <form id="theForm" action="/api" method="POST">
+    <textarea id="jsonTest" name="jsonTest" rows="30" style="width:700px"></textarea>
+    <br/>
+    <input type="submit" value="Submit">
+  </form>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script>
+    // Handle submit on request form
+    $('#theForm').on('submit', function (e) {
+      e.preventDefault()
+      $.ajax({
+        url: '/api',
+        type: 'POST',
+        data: $('#jsonTest').val(),
+        dataType: 'json',
+        success: function (response) {
+          console.log(response)
+          $('#jsonTest').val(response)
+        }
+      })
+    })
+
+    // DOM ready
+    $(document).ready(function () {
+      $.getJSON('sample-input.json', function (data) {
+        $('#jsonTest').val(JSON.stringify(data))
+      })
+    })
+  </script>
+</body>
+</html>
