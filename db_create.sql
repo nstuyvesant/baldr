@@ -148,10 +148,10 @@ CREATE INDEX fki_tests_snapshots_fkey ON public.tests USING btree (snapshot_id);
 -- Use stored procedures to interact with DB (never direct queries) - allows us to change schema without breaking things
 
 -- Insert cloud record or update email recipients if one exists
-CREATE OR REPLACE FUNCTION cloud_upsert(cloud_fqdn character varying(255), OUT cloud_id uuid) AS $$
+CREATE OR REPLACE FUNCTION cloud_upsert(character varying(255), OUT cloud_id uuid) AS $$
 BEGIN
-    INSERT INTO clouds(fqdn) VALUES (cloud_fqdn)
-        ON CONFLICT (fqdn) DO NOTHING
+    INSERT INTO clouds(fqdn) VALUES ($1)
+        ON CONFLICT (fqdn) DO UPDATE SET fqdn = $1 -- re-update in order to get id
         RETURNING id INTO cloud_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -165,7 +165,7 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION age_test(uuid, character varying(4000), OUT test_age_id uuid) AS $$
 BEGIN
     INSERT INTO test_age(cloud_id, test_name) VALUES (cloud_get_id($1), $2)
-        ON CONFLICT (cloud_id, test_name) DO NOTHING
+        ON CONFLICT (cloud_id, test_name) DO UPDATE SET test_name = $2 -- re-update in order to get id
         RETURNING id INTO test_age_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -206,7 +206,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Read a snapshot in JSON format
-CREATE OR REPLACE FUNCTION json_snapshot_add(input json, OUT done boolean) AS $$
+CREATE OR REPLACE FUNCTION json_snapshot_upsert(input json, OUT done boolean) AS $$
 DECLARE
     v_cloud_id uuid := cloud_upsert((input->>'fqdn')::varchar);
     v_snapshot_id uuid;
@@ -220,6 +220,11 @@ BEGIN
         (input->>'scripting')::integer,
         (input->>'unknowns')::integer
     );
+    -- Delete records related to existing snapshot (as this will overwrite)
+    DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
+    DELETE FROM devices WHERE snapshot_id = v_snapshot_id;
+    DELETE FROM tests WHERE snapshot_id = v_snapshot_id;
+
     -- Add recommendations
     WITH r AS (
         SELECT
@@ -260,8 +265,10 @@ BEGIN
     INSERT INTO
         tests(snapshot_id, rank, test_name, failures_last24h, passes_last24h)
         SELECT snapshot_id, rank, test_name, failures_last24h, passes_last24h FROM t;
-    -- TODO: update test age since we didn't use test_add() that does it automatically
-    -- Bogus value
+    INSERT INTO
+        test_age(cloud_id, test_name)
+        SELECT v_cloud_id, test_name FROM tests WHERE snapshot_id = v_snapshot_id
+            ON CONFLICT DO NOTHING;
     done := TRUE;
 END;
 $$ LANGUAGE plpgsql;
@@ -353,10 +360,13 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
 --   SELECT populate_test_data();
 -- COMMIT;
 
-SELECT json_snapshot_add('
+BEGIN; -- Start a transaction
+
+-- Show how to populate test data using JSON - alternative to the functions in populate_test_data()
+SELECT json_snapshot_upsert('
 {
-	"fqdn": "foo.perfectomobile.com",
-	"snapshotDate": "2018-06-17",
+	"fqdn": "acme.perfectomobile.com",
+	"snapshotDate": "2018-06-12",
 	"last24h": 37,
 	"lab": 10,
 	"orchestration": 20,
@@ -458,5 +468,112 @@ SELECT json_snapshot_add('
 }
 '::json);
 
+SELECT json_snapshot_upsert('
+{
+	"fqdn": "acme.perfectomobile.com",
+	"snapshotDate": "2018-06-13",
+	"last24h": 89,
+	"lab": 11,
+	"orchestration": 21,
+	"scripting": 31,
+	"unknowns": 13,
+	"recommendations": [{
+		"rank": 1,
+		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+		"impact": 30,
+		"impactMessage": null
+	}, {
+		"rank": 2,
+		"recommendation": "Use smart check for busy devices",
+		"impact": 15,
+		"impactMessage": null
+	}, {
+		"rank": 3,
+		"recommendation": "Remediate TransferMoney test",
+		"impact": 12,
+		"impactMessage": null
+	}, {
+		"rank": 4,
+		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+		"impact": 6,
+		"impactMessage": null
+	}, {
+		"rank": 5,
+		"recommendation": "Ensure tests use Digitalzoom API",
+		"impact": 0,
+		"impactMessage": "Eliminate 720 Unknowns"
+	}],
+	"topProblematicDevices": [{
+		"rank": 1,
+		"model": "iPhone-5S",
+		"os": "iOS 9.2.1",
+		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+		"passed": 0,
+		"failed": 25,
+		"errors": 10
+	}, {
+		"rank": 2,
+		"model": "Galaxy S5",
+		"os": "Android 5.0",
+		"id": "B5DED881",
+		"passed": 0,
+		"failed": 23,
+		"errors": 23
+	}, {
+		"rank": 3,
+		"model": "Galaxy Note III",
+		"os": "Android 4.4",
+		"id": "61F1BF00",
+		"passed": 1,
+		"failed": 15,
+		"errors": 10
+	}, {
+		"rank": 4,
+		"model": "Nexus 5",
+		"os": "Android 5.0",
+		"id": "06B25936007418BB",
+		"passed": 2,
+		"failed": 13,
+		"errors": 9
+	}, {
+		"rank": 5,
+		"model": "iPhone-6",
+		"os": "iOS 9.1",
+		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+		"passed": 2,
+		"failed": 12,
+		"errors": 8
+	}],
+	"topFailingTests": [{
+		"rank": 1,
+		"test": "TransferMoney",
+		"failures": 75,
+		"passes": 0
+	}, {
+		"rank": 2,
+		"test": "FindBranch",
+		"failures": 71,
+		"passes": 3
+	}, {
+		"rank": 3,
+		"test": "HonkHorn",
+		"failures": 68,
+		"passes": 13
+	}, {
+		"rank": 4,
+		"test": "InsuranceSearch",
+		"failures": 7,
+		"passes": 0
+	}, {
+		"rank": 5,
+		"test": "RemoteStart",
+		"failures": 41,
+		"passes": 25
+	}]
+}
+'::json);
+
+COMMIT;
+
 -- Show what the JSON looks like
---SELECT cloudSnapshot('foo.perfectomobile.com', '2018-06-17'::date);
+SELECT cloudSnapshot('acme.perfectomobile.com', '2018-06-12'::date);
