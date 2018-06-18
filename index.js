@@ -61,4 +61,4 @@ app.post('/api', (req, res, next) => {
   }
 })
 
-app.listen(3000, () => console.log('Baldr listening on port 3000.'))
+app.listen(80, () => console.log('Baldr listening on port 3000.'))

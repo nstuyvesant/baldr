@@ -31,11 +31,11 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Testing
 
-1. To see report populated from the database, go to [http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/?cloud=acme.perfectomobile.com&date=2018-06-12)
+1. To see report populated from the database, go to [http://localhost/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost/?cloud=acme.perfectomobile.com&date=2018-06-12)
 
-2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost:3000/api/?cloud=acme.perfectomobile.com&date=2018-06-12)
+2. To view JSON returned by the API, go to [http://localhost/api/?cloud=acme.perfectomobile.com&date=2018-06-12](http://localhost/api/?cloud=acme.perfectomobile.com&date=2018-06-12)
 
-3. To experiment submitting JSON to the API, go to [http://localhost:3000/test.html](http://localhost:3000/test.html)
+3. To experiment submitting JSON to the API, go to [http://localhost/test.html](http://localhost/test.html)
 
 ### Overview of files
 
@@ -55,7 +55,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
-[node]: https://img.shields.io/badge/nodejs-10.4.0-green.svg
+[node]: https://img.shields.io/badge/nodejs-10.4.1-green.svg
 [node-url]: https://nodejs.org
 [postgresql]: https://img.shields.io/badge/postgresql-10.4.0-blue.svg
 [postgresql-url]: https://www.postgresql.org
