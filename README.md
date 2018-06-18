@@ -27,7 +27,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 5. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called acme.perfectomobile.com with a snapshot for 2018-06-12
 
-6. Type `npm install && npm start` 
+6. Type `npm install && sudo npm start` (must use sudo npm start on macOS because we're using TCP port 80)
 
 ### Testing
 
