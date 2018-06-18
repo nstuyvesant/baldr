@@ -128,6 +128,8 @@
                             <th scope="col">Model</th>
                             <th scope="col">OS</th>
                             <th scope="col">ID</th>
+                            <th scope="col">Passes</th>
+                            <th scope="col">Failures</th>
                             <th scope="col">Errors</th>
                         </tr>
                     </thead>
@@ -289,7 +291,7 @@
                 $('#totalImpact').text(totalImpact)
                 for (let index in reportData.topProblematicDevices) {
                     let problematicDevice = reportData.topProblematicDevices[index]
-                    tableRow = '<tr><th scope="row">' + problematicDevice.rank + '</th><td>' + problematicDevice.model + '</td><td>' + problematicDevice.os + '</td><td>' + problematicDevice.id + '</td><td>' + problematicDevice.errors + '</td></tr>'
+                    tableRow = '<tr><th scope="row">' + problematicDevice.rank + '</th><td>' + problematicDevice.model + '</td><td>' + problematicDevice.os + '</td><td>' + problematicDevice.id + '</td><td>' + problematicDevice.passed + '</td><td>' + problematicDevice.failed + '</td><td>' + problematicDevice.errors + '</td></tr>'
                     $('#devicesTable > tbody:last-child').append(tableRow)
                 }
 
