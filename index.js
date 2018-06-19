@@ -4,10 +4,18 @@ const app = express()
 const path = require('path')
 const pgConnectionString = 'postgresql://postgres@localhost:5432/vr'
 const bodyParser = require('body-parser');
+const compression = require('compression');
+const helmet = require('helmet')
 
 // Allow ExpressJS to support JSON and URL-encoded bodies
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Add some basic security
+app.use(helmet())
+
+//Compress all routes
+app.use(compression());
 
 // Serve up any content requested from /public
 app.use(express.static(path.join(__dirname, 'public')))
