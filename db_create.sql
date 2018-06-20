@@ -181,6 +181,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Delete snapshot
+CREATE OR REPLACE FUNCTION snapshot_delete(uuid, OUT done boolean) AS $$
+BEGIN
+	DELETE FROM snapshots WHERE snapshot_id = $1;
+    DELETE FROM recommendations WHERE snapshot_id = $1;
+    DELETE FROM devices WHERE snapshot_id = $1;
+    DELETE FROM tests WHERE snapshot_id = $1;
+	done := true;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Add a device to the snapshot
 CREATE OR REPLACE FUNCTION device_add(uuid, integer, character varying(255), character varying(255), character varying(255), integer, integer, integer, OUT devices_id uuid) AS $$
 BEGIN
