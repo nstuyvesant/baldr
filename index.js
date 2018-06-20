@@ -6,43 +6,20 @@ const pgConnectionString = 'postgresql://postgres@localhost:5432/vr'
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet')
-const http = require('http')
 const https = require('https')
 
 const authenticate = (fqdn, securityToken) => {
-  const options = {
-    host: fqdn,
-    port: 443,
-    path: `/services/groups/?operation=list&securityToken=${securityToken}`,
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }
-  // Will either return
-  // {"groups":[..],"info":{"creationTime":{"formatted":"2018-06-20T02:53:14Z","millis":"1529463194307"},"items":"14","modelVersion":"2.10.0.0","productVersion":"18.7","time":"2018-06-20T02:53:14Z"}}
-  // or {"errorMessage":"Failed to list groups - Access denied - bad credentials"} if bad authentication
-  let port = options.port == 443 ? https : http
-  let req = port.request(options, res => {
-    let output = ''
-    console.log(options.host + ':' + res.statusCode)
-    res.setEncoding('utf8')
-
-    res.on('data', chunk => {
-      output += chunk
-    });
-
-    res.on('end', () => {
-      let obj = JSON.parse(output)
-      onResult(res.statusCode, obj)
-    });
+  https.get(`https://${fqdn}/services/groups/?operation=list&securityToken=${securityToken}`, res => {
+    console.log('statusCode:', res.statusCode)
+    console.log('headers:', res.headers)
+    res.on('data', (d) => {
+      // TODO: interpret response for authentication errors
+      console.log(d)
+      process.stdout.write(d)
+    })
+  }).on('error', (e) => {
+    console.error(e)
   })
-
-  req.on('error', err => {
-    //res.send('error: ' + err.message);
-  });
-
-  req.end();
 }
 
 // Allow ExpressJS to support JSON and URL-encoded bodies
