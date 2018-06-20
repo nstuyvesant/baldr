@@ -33,9 +33,9 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Testing
 
-1. To see report populated from the database, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19)
+1. To see report populated from the database, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-CODE](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19)
 
-2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19)
+2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-CODE](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19)
 
 3. To experiment submitting JSON to the API, go to [http://localhost:3000/test.html](http://localhost:3000/test.html)
 

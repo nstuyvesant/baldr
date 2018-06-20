@@ -1,9 +1,9 @@
 {
-	"fqdn": "acme.perfectomobile.com",
-	"snapshotDate": "2018-06-12",
+	"fqdn": "demo.perfectomobile.com",
+	"snapshotDate": "2018-06-20",
 	"last24h": 37,
-	"last7d": 37,
-	"last14d": 37,
+	"last7d": 57,
+	"last14d": 72,
 	"lab": 10,
 	"orchestration": 20,
 	"scripting": 30,

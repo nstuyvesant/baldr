@@ -185,9 +185,10 @@
             // Get cloud and date values from querystring
             let cloud = qs('cloud')
             let snapshotDate = qs('date')
+            let securityToken = qs('securityToken')
 
             // Load content from our API
-            $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate, function (reportData) {
+            $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate + '&securityToken=' + securityToken, function (reportData) {
                 // Show main report (hidden in case we need to show alert due to no data)
                 $('#main').collapse('show')
 
@@ -197,9 +198,9 @@
                 // Setup chart structure
                 const chartData = {
                     labels: [
-                            'Lab',
-                            'Orchestration',
-                            'Scripting'
+                        'Lab',
+                        'Orchestration',
+                        'Scripting'
                     ],
                     datasets: [
                         {

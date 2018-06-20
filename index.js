@@ -8,17 +8,37 @@ const compression = require('compression');
 const helmet = require('helmet')
 const https = require('https')
 
-const authenticate = (fqdn, securityToken) => {
+const authenticated = (fqdn, securityToken) => {
   https.get(`https://${fqdn}/services/groups/?operation=list&securityToken=${securityToken}`, res => {
-    console.log('statusCode:', res.statusCode)
-    console.log('headers:', res.headers)
-    res.on('data', (d) => {
-      // TODO: interpret response for authentication errors
-      console.log(d)
-      process.stdout.write(d)
+    const { statusCode } = res
+    const contentType = res.headers['content-type']
+    let error
+    if (statusCode !== 200) {
+      error = new Error(`Request Failed.\nStatus Code: ${statusCode}`)
+    } else if (!/^application\/json/.test(contentType)) {
+      error = new Error(`Invalid content-type.\nExpected application/json but received ${contentType}`);
+    }
+    if (error) {
+      console.error(error.message)
+      // consume response data to free up memory
+      res.resume()
+      return
+    }
+    res.setEncoding('utf8')
+    let rawData = ''
+    res.on('data', (chunk) => {
+      rawData += chunk
+    })
+    res.on('end', () => {
+      try {
+        const parsedData = JSON.parse(rawData)
+        console.log(parsedData)
+      } catch (e) {
+        console.error(e.message)
+      }
     })
   }).on('error', (e) => {
-    console.error(e)
+    console.error(`Got error: ${e.message}`)
   })
 }
 
