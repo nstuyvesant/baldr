@@ -27,17 +27,25 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 5. Type `cd baldr && npm install` to connect to the directory and install NodeJS dependencies
 
-6. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called acme.perfectomobile.com with a snapshot for 2018-06-12
+6. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called demo.perfectomobile.com with a snapshot for 2018-06-20
 
 7. Type `npm start`
 
 ### Testing
 
-1. To see report populated from the database, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-CODE](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19)
+1. To see report populated from the database, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
 
-2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-CODE](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19)
+2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
 
-3. To experiment submitting JSON to the API, go to [http://localhost:3000/test.html](http://localhost:3000/test.html)
+3. To experiment submitting JSON to the API, go to [http://localhost:3000/test.html?cloud=demo.perfectomobile.com&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/test.html?cloud=demo.perfectomobile.com&securityToken=)
+
+### Production
+
+1. For a production server, type `npm install -g pm2` to install [PM2](https://github.com/Unitech/pm2) to manage NodeJS
+
+2. Make sure NODE_ENV=production. Read [this article](https://www.dynatrace.com/news/blog/the-drastic-effects-of-omitting-node_env-in-your-express-js-applications/) to understand why.
+
+3. See [this article](https://www.serverlab.ca/tutorials/linux/web-servers-linux/how-to-run-nodejs-in-production-using-nginx-with-ubuntu-18-04/) to setup nginx with NodeJS 10.4.1 on Ubuntu 18.04. Be sure to alter their approach to use pm2 and the correct NODE_ENV variable.
 
 ### Overview of files
 
@@ -47,9 +55,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Backlog
 
-1. Add support for securityToken in app layer using Perfecto HTTP API
-
-2. Deploy on baldr.perfectomobile.com with pm2, nginx and an SSL certificate
+1. Deploy on baldr.perfectomobile.com with pm2, nginx and an SSL certificate
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com

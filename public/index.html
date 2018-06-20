@@ -303,7 +303,8 @@
                     $('#testsTable > tbody:last-child').append(tableRow)
                 }
             }) // Get JSON
-            .fail(function() { // Handle no data for cloud/date combination
+            .fail(function(e) { // Handle no data for cloud/date combination
+                $('#noData').text(e.responseJSON.message)
                 // Set alert message
                 $('#alertCloud').text(cloud)
                 $('#alertSnapshotDate').text(snapshotDate)
