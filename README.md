@@ -47,13 +47,9 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Backlog
 
-1. Ran and Uzi to write records to vr database daily using PostgreSQL functions: cloud_upsert(), snapshot_add(), device_add(), test_add(), recommendation_add()
+1. Add support for securityToken in app layer using Perfecto HTTP API
 
-2. Replace use of FQDN with UUID in PostgreSQL function cloudSnapshot() to improve security (give list of UUIDs to Michael)
-
-3. Establish FQDN and SSL certificate for this server on AWS
-
-4. Tzvika to have Michael add hyperlink to Digitalzoom that passes UUID for MCM and current date (ISO 8601 format) to appropriate URL
+2. Deploy on baldr.perfectomobile.com with pm2, nginx and an SSL certificate
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
