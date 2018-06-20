@@ -365,8 +365,8 @@ BEGIN; -- Start a transaction
 -- Show how to populate test data using JSON - alternative to the functions in populate_test_data()
 SELECT json_snapshot_upsert('
 {
-	"fqdn": "acme.perfectomobile.com",
-	"snapshotDate": "2018-06-12",
+	"fqdn": "demo.perfectomobile.com",
+	"snapshotDate": "2018-06-19",
 	"last24h": 37,
 	"lab": 10,
 	"orchestration": 20,
@@ -470,8 +470,8 @@ SELECT json_snapshot_upsert('
 
 SELECT json_snapshot_upsert('
 {
-	"fqdn": "acme.perfectomobile.com",
-	"snapshotDate": "2018-06-13",
+	"fqdn": "demo.perfectomobile.com",
+	"snapshotDate": "2018-06-20",
 	"last24h": 89,
 	"lab": 11,
 	"orchestration": 21,
