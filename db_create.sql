@@ -17,7 +17,7 @@
 
 -- ALTER ROLE postgres SUPERUSER;
 
-CREATE USER baldr;
+CREATE USER IF NOT EXISTS baldr;
 
 -- Forcefully disconnect anyone
 SELECT pid, pg_terminate_backend(pid) 
