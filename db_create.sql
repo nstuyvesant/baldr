@@ -138,6 +138,15 @@ COMMENT ON COLUMN public.tests.test_name IS 'Name of the test having issues';
 COMMENT ON COLUMN public.tests.failures_last24h IS 'Number of failures of the test for the last 7 days';
 COMMENT ON COLUMN public.tests.passes_last24h IS 'The number of times the test has passed over the last 7 days';
 
+-- Table for Uzi
+CREATE TABLE public.tokens (
+    cloud character varying(255),
+    token character varying(2000)
+)
+WITH (
+    OIDS = FALSE
+);
+
 -- Add indices
 
 CREATE INDEX fki_clouds_fkey ON public.snapshots USING btree (cloud_id);
