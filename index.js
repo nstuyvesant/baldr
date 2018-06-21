@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet')
 const https = require('https')
+const port = process.env.NODE_PORT || 3000;
 
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
@@ -119,5 +120,5 @@ app.post('/api', authenticate, (req, res) => {
   })
 })
 
-// Listen on TCP port 3000.
-app.listen(3000, () => console.log('Baldr listening on port 3000.'))
+// Listen for requests
+app.listen(port, () => console.log(`Baldr listening on port ${port}.`))
