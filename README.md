@@ -55,13 +55,15 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 7. Type `sudo systemctl start baldr` to start the Baldr Report Server on TCP port 3000
 
-8. Type `sudo apt install nginx` to install nginx
+8. Type `sudo systemctl enable baldr` to enable it to run on startup
 
-9. Type `sudo nano /etc/nginx/sites-available/default` to modify the nginx configuration file
+9. Type `sudo apt install nginx` to install nginx
 
-10. Comment out the lines with `root /var/www/html;`, `index index.html index.htm... etc.;`, and `try_files $uri $uri/ =404;`
+10. Type `sudo nano /etc/nginx/sites-available/default` to modify the nginx configuration file
 
-11. Within `location / {...}`, add `
+11. Comment out the lines with `root /var/www/html;`, `index index.html index.htm... etc.;`, and `try_files $uri $uri/ =404;`
+
+12. Within `location / {...}`, add `
 		proxy_pass http://localhost:3000;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
@@ -69,11 +71,11 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 		proxy_set_header Host $host;
 		proxy_cache_bypass $http_upgrade;` then save
 
-12. Check your configuration by typing `sudo nginx -t` and fix any errors
+13. Check your configuration by typing `sudo nginx -t` and fix any errors
 
-13. Type `sudo systemctl restart nginx` to restart nginx with the new configuration
+14. Type `sudo systemctl restart nginx` to restart nginx with the new configuration
 
-14. Test everything works by typing `curl http://localhost/test.html`
+15. Test everything works by typing `curl http://localhost/test.html`
 
 ### Overview of files
 
