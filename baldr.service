@@ -1,0 +1,14 @@
+[Unit]
+Description=Baldr Report Server
+Documentation=https://github.com/nstuyvesant/baldr
+After=network.target
+
+[Service]
+Environment=NODE_ENV=production PORT=3000
+Type=simple
+User=baldr
+ExecStart=/usr/bin/node /home/baldr/index.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

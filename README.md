@@ -41,11 +41,39 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Production
 
-1. For a production server, type `npm install -g pm2` to install [PM2](https://github.com/Unitech/pm2) to manage NodeJS
+1. To run in production on Ubuntu 18.04, login to your server then type `sudo useradd baldr` to create a low-privileged user.
 
-2. Make sure NODE_ENV=production. Read [this article](https://www.dynatrace.com/news/blog/the-drastic-effects-of-omitting-node_env-in-your-express-js-applications/) to understand why.
+2. Type `cd /home && git clone https://github.com/nstuyvesant/baldr.git`
 
-3. See [this article](https://www.serverlab.ca/tutorials/linux/web-servers-linux/how-to-run-nodejs-in-production-using-nginx-with-ubuntu-18-04/) to setup nginx with NodeJS 10.4.1 on Ubuntu 18.04. Be sure to alter their approach to use pm2 and the correct NODE_ENV variable.
+3. Type `sudo chown -R baldr:baldr /home/baldr`
+
+4. Type `sudo chmod 755 /home/baldr && sudo chmod 744 -R /home/baldr/*`
+
+5. Type `sudo cp baldr.service /etc/systemd/system/` to copy the SystemD configuration file to the required directory
+
+6. Type `sudo systemctl daemon-reload` to reload the list of daemons
+
+7. Type `sudo systemctl start baldr` to start the Baldr Report Server on TCP port 3000
+
+8. Type `sudo apt install nginx` to install nginx
+
+9. Type `sudo nano /etc/nginx/sites-available/default` to modify the nginx configuration file
+
+10. Comment out the lines with `root /var/www/html;`, `index index.html index.htm... etc.;`, and `try_files $uri $uri/ =404;`
+
+11. Within `location / {...}`, add `
+		proxy_pass http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+		proxy_set_header Host $host;
+		proxy_cache_bypass $http_upgrade;` then save
+
+12. Check your configuration by typing `sudo nginx -t` and fix any errors
+
+13. Type `sudo systemctl restart nginx` to restart nginx with the new configuration
+
+14. Test everything works by typing `curl http://localhost/test.html`
 
 ### Overview of files
 
