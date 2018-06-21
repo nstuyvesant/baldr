@@ -2,20 +2,22 @@
 -- $ psql -d postgres -f db_create.sql
 
 -- Create user if doesn't exist
-DO
-$do$
-BEGIN
-   IF NOT EXISTS (
-      SELECT                       -- SELECT list can stay empty for this
-      FROM   pg_catalog.pg_roles
-      WHERE  rolname = 'postgres') THEN
+-- DO
+-- $do$
+-- BEGIN
+--    IF NOT EXISTS (
+--       SELECT                       -- SELECT list can stay empty for this
+--       FROM   pg_catalog.pg_roles
+--       WHERE  rolname = 'postgres') THEN
 
-      CREATE ROLE postgres LOGIN PASSWORD 'mysecret123';
-   END IF;
-END
-$do$;
+--       CREATE ROLE postgres LOGIN PASSWORD 'mysecret123';
+--    END IF;
+-- END
+-- $do$;
 
-ALTER ROLE postgres SUPERUSER;
+-- ALTER ROLE postgres SUPERUSER;
+
+CREATE USER baldr;
 
 -- Forcefully disconnect anyone
 SELECT pid, pg_terminate_backend(pid) 
@@ -373,7 +375,8 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
         WHERE fqdn = $1 AND snapshot_date = $2::DATE) s;
 $$ LANGUAGE sql;
 
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres; 
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO baldr;
 
 -- Run the function to populate the date inside a transaction
 -- BEGIN;
