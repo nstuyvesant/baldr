@@ -50,7 +50,7 @@ const authenticate = (req, res, next) => {
 // Add some basic security
 app.use(helmet())
 
-//Compress all routes
+// Compress all routes
 app.use(compression());
 
 // Allow ExpressJS to support JSON and URL-encoded bodies
