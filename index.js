@@ -105,7 +105,7 @@ app.post('/api', authenticate, (req, res) => {
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
     if (err) {
-      res.status(502).json({ success: false, message: 'Not able to connect to database to submit snapshot.' })
+      res.status(401).json({ success: false, message: 'Not able to connect to database to submit snapshot.' })
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
