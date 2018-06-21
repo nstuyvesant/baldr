@@ -49,33 +49,19 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 4. Type `sudo chmod 755 /home/baldr && sudo chmod 744 -R /home/baldr/*`
 
-5. Type `sudo cp baldr.service /etc/systemd/system/` to copy the SystemD configuration file to the required directory
+5. Enable baldr user to access vr database in PostgreSQL.
 
-6. Type `sudo systemctl daemon-reload` to reload the list of daemons
+6. Type `sudo cp baldr.service /etc/systemd/system/` to copy the SystemD configuration file to the required directory
 
-7. Type `sudo systemctl start baldr` to start the Baldr Report Server on TCP port 3000
+7. Type `sudo systemctl daemon-reload` to reload the list of daemons
 
-8. Type `sudo systemctl enable baldr` to enable it to run on startup
+8. Type `sudo systemctl start baldr` to start the Baldr Report Server on TCP port 3000
 
-9. Type `sudo apt install nginx` to install nginx
+9. Type `sudo systemctl enable baldr` to enable it to run on startup
 
-10. Type `sudo nano /etc/nginx/sites-available/default` to modify the nginx configuration file
+10. Setup ALB to front-end http://localhost:3000
 
-11. Comment out the lines with `root /var/www/html;`, `index index.html index.htm... etc.;`, and `try_files $uri $uri/ =404;`
-
-12. Within `location / {...}`, add `
-		proxy_pass http://localhost:3000;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
-		proxy_set_header Host $host;
-		proxy_cache_bypass $http_upgrade;` then save
-
-13. Check your configuration by typing `sudo nginx -t` and fix any errors
-
-14. Type `sudo systemctl restart nginx` to restart nginx with the new configuration
-
-15. Test everything works by typing `curl http://localhost/test.html`
+11. Test everything works by typing `curl http://localhost/test.html`
 
 ### Overview of files
 
