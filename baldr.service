@@ -1,11 +1,12 @@
 [Unit]
 Description=Baldr Report Server
-Documentation=https://github.com/nstuyvesant/baldr
+Documentation=https://github.com/nstuyvesant/baldr/blob/master/README.md
 After=network.target
+Wants=postgresql.service
 
 [Service]
 User=baldr
-Environment=NODE_ENV=production PORT=3000
+Environment=NODE_ENV=production NODE_PORT=3000
 WorkingDirectory=/home/baldr
 ExecStart=/usr/bin/node index.js
 Type=simple
