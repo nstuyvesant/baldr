@@ -39,12 +39,12 @@ const authenticate = (req, res, next) => {
         console.log(`Successfully authenticated to ${req.query.cloud}`)
         return next()
       } else {
-        res.status(500).json({ success: false, message: 'Received unexpected response from cloud.' })
+        res.status(417).json({ success: false, message: 'Received unexpected response from cloud.' })
       }
     })
   }).on('error', (e) => {
     console.error(`Got error: ${e.message}`)
-    res.status(500).json({ success: false, message: 'Received unexpected response from cloud.' })
+    res.status(424).json({ success: false, message: 'Received unexpected response from cloud.' })
   })
 }
 
@@ -68,13 +68,13 @@ app.get('/api', authenticate, (req, res) => {
   const snapshotDate = req.query.date
   const missingParams = !cloud || !snapshotDate
   if (missingParams) {
-    res.status(501).json({ success: false, message: 'Missing parameter(s): cloud and date are required.' })
+    res.status(400).json({ success: false, message: 'Missing parameter(s): cloud and date are required.' })
     return
   }
   // Try connecting to PostgreSQL
   client.connect(pgConnectionString, err => {
     if (err) {
-      res.status(502).json({ success: false, message: 'Not able to connect to database to retrieve snapshot.' })
+      res.status(401).json({ success: false, message: 'Not able to connect to database to retrieve snapshot.' })
       return
     }
     // Run parameterized query to prevent SQL injection
@@ -91,7 +91,7 @@ app.get('/api', authenticate, (req, res) => {
 // Handle HTTP POST of JSON to /api
 app.post('/api', authenticate, (req, res) => {
   if(!req.body) { // Is there content?
-    res.status(504).json({ success: false, message: 'Nothing received.' })
+    res.status(444).json({ success: false, message: 'Nothing received.' })
     return
   }
   // Disabled because jQuery.post() doesn't allow the content type to be set explicitly and .ajax() is too verbose
@@ -111,7 +111,7 @@ app.post('/api', authenticate, (req, res) => {
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
     client.query(sql, [jsonSnapshot], (err, rows)=> {
       if (err) {
-        res.status(503).json({ success: false, message: 'Not able to submit snapshot to database (but connected successfully).' })
+        res.status(424).json({ success: false, message: 'Not able to submit snapshot to database (but connected successfully).' })
         return
       }
       console.log('Processed JSON request.')
