@@ -49,23 +49,27 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 4. Type `sudo chmod 755 /home/baldr && sudo chmod 744 -R /home/baldr/*`
 
-5. Type `su - baldr` to open a shell as the baldr user
+5. Type `cd /home/baldr`
 
-6. Type `npm install` to install project dependencies then `exit`
+5. Type `su - postgres`
 
-7. Enable baldr user to access vr database in PostgreSQL.
+6. Type `psql -d postgres -f db_create.sql` to create the database then `exit`
 
-8. Type `sudo cp baldr.service /etc/systemd/system/` to copy the SystemD configuration file to the required directory
+7. Type `su - baldr` to open a shell as the baldr user
 
-9. Type `sudo systemctl daemon-reload` to reload the list of daemons
+8. Type `npm install` to install project dependencies then `exit`
 
-10. Type `sudo systemctl start baldr` to start the Baldr Report Server on TCP port 3000
+9. Type `sudo cp baldr.service /etc/systemd/system/` to copy the SystemD configuration file to the required directory
 
-11. Type `sudo systemctl enable baldr` to enable it to run on startup
+10. Type `sudo systemctl daemon-reload` to reload the list of daemons
 
-12. Setup ALB to front-end http://localhost:3000
+11. Type `sudo systemctl start baldr` to start the Baldr Report Server on TCP port 3000
 
-13. Test everything works by typing `curl http://localhost/test.html`
+12. Type `sudo systemctl enable baldr` to enable it to run on startup
+
+13. Setup ALB to front-end http://localhost:3000
+
+14. Test by typing `curl http://localhost/test.html`
 
 ### Overview of files
 
