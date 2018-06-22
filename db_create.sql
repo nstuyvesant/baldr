@@ -75,6 +75,7 @@ CREATE TABLE public.snapshots (
     orchestration_issues bigint,
     scripting_issues bigint,
     unknowns bigint,
+	executions bigint
   UNIQUE (cloud_id, snapshot_date)
 );
 
@@ -84,6 +85,7 @@ COMMENT ON COLUMN public.snapshots.lab_issues IS 'The number of script failures 
 COMMENT ON COLUMN public.snapshots.orchestration_issues IS 'The number of script failures due to attempts to use the same device';
 COMMENT ON COLUMN public.snapshots.scripting_issues IS 'The number of script failures due to a problem with the script or framework over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.unknowns IS 'The number of unknown scripts over the past 24 hours';
+COMMENT ON COLUMN public.snapshots.executions IS 'The number of executions over the past 24 hours';
 
 
 CREATE TABLE public.devices (
@@ -182,12 +184,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create snapshot or update if one exists
-CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
+CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
 BEGIN
-    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns)
-        VALUES ($1, $2, $3, $4, $5, $6 ,$7)
+    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions)
+        VALUES ($1, $2, $3, $4, $5, $6 ,$7, $8)
             ON CONFLICT (cloud_id, snapshot_date)
-                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns=$7
+                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8
             RETURNING id INTO snapshot_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -240,7 +242,8 @@ BEGIN
         (input->>'lab')::integer,
         (input->>'orchestration')::integer,
         (input->>'scripting')::integer,
-        (input->>'unknowns')::integer
+        (input->>'unknowns')::integer,
+		(input->>'executions')::integer
     );
     -- Delete records related to existing snapshot (as this will overwrite)
     DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
@@ -299,7 +302,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
 DECLARE
     cloud_id uuid := cloud_upsert('acme.perfectomobile.com');
-    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30, 12);
+    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30, 12, 1230);
 BEGIN
     PERFORM device_add(snapshot_id, 1, 'iPhone-5S', 'iOS 9.2.1', '544cc6c6026af23c11f5ed6387df5d5f724f60fb', 0, 25, 10);
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
@@ -332,7 +335,8 @@ CREATE VIEW clouds_snapshots AS
         lab_issues,
         orchestration_issues,
         scripting_issues,
-        unknowns
+        unknowns,
+		executions
     FROM clouds
     INNER JOIN
         snapshots ON clouds.id = snapshots.cloud_id;
@@ -343,7 +347,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
             success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab, orchestration_issues AS orchestration,
-            scripting_issues AS scripting, unknowns,
+            scripting_issues AS scripting, unknowns, executions,
             (
                 SELECT array_to_json(array_agg(row_to_json(r)))
                 FROM (
@@ -395,6 +399,7 @@ SELECT json_snapshot_upsert('
 	"orchestration": 20,
 	"scripting": 30,
 	"unknowns": 12,
+	"executions": 1230,
 	"recommendations": [{
 		"rank": 1,
 		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
@@ -500,6 +505,7 @@ SELECT json_snapshot_upsert('
 	"orchestration": 21,
 	"scripting": 31,
 	"unknowns": 13,
+	"executions": 1028,
 	"recommendations": [{
 		"rank": 1,
 		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",

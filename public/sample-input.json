@@ -6,6 +6,7 @@
 	"orchestration": 20,
 	"scripting": 30,
 	"unknowns": 12,
+	"executions": 1230,
 	"recommendations": [{
 		"rank": 1,
 		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
