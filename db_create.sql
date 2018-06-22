@@ -301,8 +301,8 @@ $$ LANGUAGE plpgsql;
 -- Load test data dependencies
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
 DECLARE
-    cloud_id uuid := cloud_upsert('acme.perfectomobile.com');
-    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-12'::DATE, 37, 10, 20, 30, 12, 1230);
+    cloud_id uuid := cloud_upsert('demo.perfectomobile.com');
+    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-20'::DATE, 37, 10, 20, 30, 12, 1230);
 BEGIN
     PERFORM device_add(snapshot_id, 1, 'iPhone-5S', 'iOS 9.2.1', '544cc6c6026af23c11f5ed6387df5d5f724f60fb', 0, 25, 10);
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
