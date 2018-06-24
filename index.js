@@ -11,14 +11,10 @@ const port = process.env.NODE_PORT || 3000;
 
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
-  // Check if parameters are present and bail out if not.
-  console.log('*** req', req)
   const { cloud, securityToken, user, password } = req.query
-
-  // console.log('cloud', cloud)
-  // console.log('securityToken', securityToken)
-  // console.log('user', user)
-  // console.log('password', password)
+  console.log('user parameter sent', !!user)
+  console.log('password parameter sent', !!password)
+  // Check if parameters are present and bail out if not.
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
     res.status(401).json({ success: false, message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
@@ -102,12 +98,6 @@ app.post('/api', authenticate, (req, res) => {
     res.status(444).json({ success: false, message: 'Nothing received.' })
     return
   }
-  // Disabled because jQuery.post() doesn't allow the content type to be set explicitly and .ajax() is too verbose
-  // const contentType = req.headers['content-type']
-  // if (!/^application\/json/.test(contentType)) { // Is it JSON?
-  //   res.status(505).json({ success: false, message: `Expected JSON but received ${contentType}.` })
-  //   return
-  // }
   console.log('Received JSON request.')
   jsonSnapshot = JSON.stringify(req.body) // convert the body back to JSON
   let client = new Client()
