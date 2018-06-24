@@ -12,9 +12,9 @@ const port = process.env.NODE_PORT || 3000;
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   // Check if parameters are present and bail out if not.
-  console.log(req.headers['content-type'])
-  const { cloud, securityToken, user, password } = req.query
   console.log('req.query', req.query)
+  const { cloud, securityToken, user, password } = req.query
+
   // console.log('cloud', cloud)
   // console.log('securityToken', securityToken)
   // console.log('user', user)
