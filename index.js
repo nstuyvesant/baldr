@@ -12,7 +12,7 @@ const port = process.env.NODE_PORT || 3000;
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   // Check if parameters are present and bail out if not.
-  console.log('req.query', req.query)
+  console.log('*** req.query', req.query)
   const { cloud, securityToken, user, password } = req.query
 
   // console.log('cloud', cloud)
@@ -73,9 +73,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 // Handle HTTP GET to retrieve the snapshot
 app.get('/api', authenticate, (req, res) => {
   const client = new Client()
-  const cloud = req.query.cloud
-  const snapshotDate = req.query.date
-  const missingParams = !cloud || !snapshotDate
+  const { cloud, date } = req.query
+  const missingParams = !(cloud || date)
   if (missingParams) {
     res.status(400).json({ success: false, message: 'Missing parameter(s): cloud and date are required.' })
     return
@@ -87,7 +86,7 @@ app.get('/api', authenticate, (req, res) => {
       return
     }
     // Run parameterized query to prevent SQL injection
-    client.query(`SELECT cloudSnapshot($1, $2::DATE)`, [cloud, snapshotDate], (err, rows)=> {
+    client.query(`SELECT cloudSnapshot($1, $2::DATE)`, [cloud, date], (err, rows)=> {
       if (err) {
         res.status(503).send('Not able to retrieve snapshot from database (but connected successfully).')
         return
