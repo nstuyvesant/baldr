@@ -12,11 +12,13 @@ const port = process.env.NODE_PORT || 3000;
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   // Check if parameters are present and bail out if not.
-  if (!req.query.cloud || !req.query.securityToken) {
-    res.status(401).json({ success: false, message: 'Not authorized: cloud or securityToken parameter missing.' })
+  const missingParams = !req.query.cloud || !(req.query.securityToken || (req.query.user && req.query.password))
+  if (missingParams) {
+    res.status(401).json({ success: false, message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
     return
   }
-  https.get(`https://${req.query.cloud}/services/groups/?operation=list&securityToken=${req.query.securityToken}`, getResponse => {
+  securityParams = req.query.securityToken ? `securityToken=${req.query.securityToken}` : `user=${req.query.user}&password=${req.query.password}`
+  https.get(`https://${req.query.cloud}/services/groups/?operation=list&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
       getResponse.resume() // consume getResponse to free up memory
