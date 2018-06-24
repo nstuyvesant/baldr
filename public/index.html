@@ -10,37 +10,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha256-NJWeQ+bs82iAeoT5Ktmqbi3NXwxcHlfaVejzJI2dklU=" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous" />
     <style>
-      body {
-          -webkit-font-smoothing: antialiased;
-      }
-      h1, h2, .green {
-          color: #82bc41;
-      }
-      h2 {
-          margin-top: 30px;
-          margin-bottom: 10px;
-      }
-      .red {
-          color: red;
-      }
-      .orange {
-          color: orange;
-      }
-      h1 {
-          filter: none;
-          margin-bottom: 0px;
-          margin-top: 30px;
-      }
-      .metric {
-          font-size: 2rem;
-      }
-      .logo {
-          height:70px;
-          width: 220px;
-          margin-top: 20px;
-      }
-      /* Chart.js */
-      @-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}   
+        h1, h2, .green {
+            color: #82bc41;
+        }
+        h2 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        .red {
+            color: red;
+        }
+        .orange {
+            color: orange;
+        }
+        h1 {
+            filter: none;
+            margin-bottom: 0px;
+            margin-top: 30px;
+        }
+        .metric {
+            font-size: 2rem;
+        }
+        .logo {
+            height:70px;
+            width: 220px;
+            margin-top: 20px;
+        }
+        /* Chart.js */
+        @-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}   
     </style>
 </head>
 
@@ -60,31 +57,22 @@
             </div>
             <div class="col-md-2 text-center">
                 <div class="card">
-                    <div class="card-header text-muted">
-                        Last 24h
-                    </div>
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last24h"></span>%</span>
+                        <span class="metric font-weight-bold"><span id="last24h"></span>%</span><br/><span class="text-muted">Last 24h</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-2 text-center">
                 <div class="card">
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last7d"></span>%</span>
-                    </div>
-                    <div class="card-header text-muted">
-                        Last 7d
+                        <span class="metric font-weight-bold"><span id="last7d"></span>%</span><br/>Last 7d
                     </div>
                 </div>
             </div>
             <div class="col-md-2 text-center">
                 <div class="card">
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last14d"></span>%</span>
-                    </div>
-                    <div class="card-header text-muted">
-                        Last 14d
+                        <span class="metric font-weight-bold"><span id="last14d"></span>%</span><br/>Last 14d
                     </div>
                 </div>
             </div>
