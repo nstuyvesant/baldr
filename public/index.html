@@ -281,6 +281,9 @@
                 const chartOptions = {
                     devicePixelRatio: 2,
                     events: false,
+                    legend: {
+                        postion: 'right'
+                    },
                     animation: {
                         duration: 500,
                         easing: 'easeOutQuart',
@@ -314,7 +317,7 @@
                     },
                     elements: {
                         center: {
-                            text: 'Issues for \n' + reportData.executions + ' Executions',
+                            text: 'Issues for ' + reportData.executions + ' Executions',
                             color: 'darkgrey',
                             fontStyle: 'Arial',
                             sidePadding: 20
