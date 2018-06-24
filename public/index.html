@@ -58,21 +58,24 @@
             <div class="col-md-2 text-center">
                 <div class="card">
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last24h"></span>%</span><br/><span class="text-muted">Last 24h</span>
+                        <span class="metric font-weight-bold"><span id="last24h"></span>%</span><br/>
+                        Last 24h
                     </div>
                 </div>
             </div>
             <div class="col-md-2 text-center">
                 <div class="card">
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last7d"></span>%</span><br/>Last 7d
+                        <span class="metric font-weight-bold"><span id="last7d"></span>%</span><br/>
+                        Last 7d
                     </div>
                 </div>
             </div>
             <div class="col-md-2 text-center">
                 <div class="card">
                     <div class="card-body">
-                        <span class="metric font-weight-bold"><span id="last14d"></span>%</span><br/>Last 14d
+                        <span class="metric font-weight-bold"><span id="last14d"></span>%</span><br/>
+                        Last 14d
                     </div>
                 </div>
             </div>
@@ -175,7 +178,7 @@
                     } else {
                         color = 'red'
                     }
-                    element.parent().addClass(color)
+                    element.parent().parent().parent().parent().addClass(color)
                 })
             }
         })
