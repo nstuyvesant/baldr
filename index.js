@@ -12,13 +12,18 @@ const port = process.env.NODE_PORT || 3000;
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   // Check if parameters are present and bail out if not.
-  const missingParams = !(req.query.cloud && (req.query.securityToken || (req.query.user && req.query.password)))
+  const { cloud, securityToken, user, password } = req.query
+  console.log('cloud', cloud)
+  console.log('securityToken', securityToken)
+  console.log('user', user)
+  console.log('password', password)
+  const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
     res.status(401).json({ success: false, message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
     return
   }
-  securityParams = req.query.securityToken ? `securityToken=${req.query.securityToken}` : `user=${req.query.user}&password=${req.query.password}`
-  https.get(`https://${req.query.cloud}/services/groups/?operation=list&${securityParams}`, getResponse => {
+  securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
+  https.get(`https://${cloud}/services/groups/?operation=list&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
       getResponse.resume() // consume getResponse to free up memory
@@ -38,7 +43,7 @@ const authenticate = (req, res, next) => {
     getResponse.on('end', () => {
       const response = JSON.parse(rawData)
       if (response.groups) { // Authenticated successfully
-        console.log(`Successfully authenticated to ${req.query.cloud}`)
+        console.log(`Successfully authenticated to ${cloud}`)
         return next()
       } else {
         res.status(417).json({ success: false, message: 'Received unexpected response from cloud.' })
