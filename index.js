@@ -14,10 +14,11 @@ const authenticate = (req, res, next) => {
   // Check if parameters are present and bail out if not.
   console.log(req.headers['content-type'])
   const { cloud, securityToken, user, password } = req.query
-  console.log('cloud', cloud)
-  console.log('securityToken', securityToken)
-  console.log('user', user)
-  console.log('password', password)
+  console.log('req.query', req.query)
+  // console.log('cloud', cloud)
+  // console.log('securityToken', securityToken)
+  // console.log('user', user)
+  // console.log('password', password)
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
     res.status(401).json({ success: false, message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
@@ -103,7 +104,7 @@ app.post('/api', authenticate, (req, res) => {
     return
   }
   // Disabled because jQuery.post() doesn't allow the content type to be set explicitly and .ajax() is too verbose
-  // const contentType = res.headers['content-type']
+  // const contentType = req.headers['content-type']
   // if (!/^application\/json/.test(contentType)) { // Is it JSON?
   //   res.status(505).json({ success: false, message: `Expected JSON but received ${contentType}.` })
   //   return
