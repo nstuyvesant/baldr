@@ -11,7 +11,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 - [Homebrew](https://brew.sh) (`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`)
 - [Git](https://git-scm.com/) (`brew install git`)
-- [Node.js 10.4.0 and npm 6.1.0](nodejs.org) (`brew install node`)
+- [Node.js 10.5.0 and npm 6.1.0](nodejs.org) (`brew install node`)
 - [PostgreSQL 10.4.0](http://postgresql.org) (`brew install postgresql`)
 - [pgAdmin4 3.0](https://www.postgresql.org/download/) (download and install it)
 
@@ -43,7 +43,7 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 1. To run in production on Ubuntu 18.04, login to your server then type `sudo useradd baldr` to create a low-privileged user.
 
-2. Type `cd /home && git clone https://github.com/nstuyvesant/baldr.git`
+2. Type `cd /home && sudo git clone https://github.com/nstuyvesant/baldr.git`
 
 3. Type `sudo chown -R baldr:baldr /home/baldr`
 
@@ -67,9 +67,9 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 12. Type `sudo systemctl enable baldr` to enable it to run on startup
 
-13. Setup ALB to front-end http://localhost:3000
+13. Setup a reverse proxy for http://fqdn:3000 with an SSL certificate
 
-14. Test by typing `curl http://localhost/test.html`
+14. Test by typing `curl https://fqdn/editor.html`
 
 ### Overview of files
 
@@ -79,11 +79,11 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 
 ### Backlog
 
-1. Deploy on baldr.perfectomobile.com with pm2, nginx and an SSL certificate
+1. Nothing at moment
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
-[node]: https://img.shields.io/badge/nodejs-10.4.1-green.svg
+[node]: https://img.shields.io/badge/nodejs-10.5.0-green.svg
 [node-url]: https://nodejs.org
 [postgresql]: https://img.shields.io/badge/postgresql-10.4.0-blue.svg
 [postgresql-url]: https://www.postgresql.org
