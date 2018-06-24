@@ -12,7 +12,7 @@ const port = process.env.NODE_PORT || 3000;
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   // Check if parameters are present and bail out if not.
-  const missingParams = !req.query.cloud || !(req.query.securityToken || (req.query.user && req.query.password))
+  const missingParams = !(req.query.cloud && (req.query.securityToken || (req.query.user && req.query.password)))
   if (missingParams) {
     res.status(401).json({ success: false, message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
     return
@@ -24,7 +24,7 @@ const authenticate = (req, res, next) => {
       getResponse.resume() // consume getResponse to free up memory
       if (statusCode === 401) {
         console.log('Did not authenticate successfully')
-        res.status(401).json({ success: false, message: 'Not authorized: cloud/securityToken did not authenticate. Is your token correct or could it have expired?' })
+        res.status(401).json({ success: false, message: 'Not authorized: cloud/securityToken (or user/password) did not authenticate. Is your token or user/password combination correct or could your token have expired?' })
         return
       }
       res.status(statusCode).json({ success: false, message: `Request to cloud failed (${statusCode}).` })
