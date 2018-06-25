@@ -3,7 +3,7 @@
 [![node][node]][node-url]
 
 # Perfecto Reporting
-Named after the Norse God of Light, this project will (eventually) generate emailed PDF reports to increase visibility of automation obstacles.
+Named after the Norse God of Light, this server generates daily reports that increase visibility of automation obstacles. The server can be accessed at [https://baldr.perfecto.io/?cloud=FQDN&date=DATE-ISO-8601&securityToken=YOUR-SECURITY-TOKEN](https://baldr.perfecto.io/?cloud=demo.perfectomobile.com&date=2018-06-20&securityToken=) with the appropriate substitutions for the parameters listed.
 
 ## Getting Started
 
@@ -76,10 +76,6 @@ Named after the Norse God of Light, this project will (eventually) generate emai
 - [db_create.sql](https://github.com/nstuyvesant/baldr/blob/master/db_create.sql) - Creates the PostgreSQL database, functions to generate JSON and populates with sample data
 
 - [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Web server using [ExpressJS](http://expressjs.com) with [pg-native](https://github.com/brianc/node-pg-native) to serve report's UI and API for required JSON
-
-### Backlog
-
-1. Nothing at moment
 
 [express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
 [express-url]: http://expressjs.com
