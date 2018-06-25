@@ -13,6 +13,7 @@ const port = process.env.NODE_PORT || 3000;
 const authenticate = (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
   console.log('req.query', req.query)
+  console.log('req.params', req.params)
   // Check if parameters are present - bail out if not
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
