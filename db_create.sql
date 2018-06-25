@@ -600,4 +600,4 @@ SELECT json_snapshot_upsert('
 COMMIT;
 
 -- Show what the JSON looks like
-SELECT cloudSnapshot('acme.perfectomobile.com', '2018-06-12'::date);
+SELECT cloudSnapshot('demo.perfectomobile.com', '2018-06-20'::date);
