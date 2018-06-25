@@ -14,10 +14,10 @@ const authenticate = (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
   console.log('user parameter sent', !!user)
   console.log('password parameter sent', !!password)
-  // Check if parameters are present and bail out if not.
+  // Check if parameters are present - bail out if not
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
-    res.status(401).json({ success: false, message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
+    res.status(401).json({ message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
     return
   }
   securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
@@ -27,10 +27,10 @@ const authenticate = (req, res, next) => {
       getResponse.resume() // consume getResponse to free up memory
       if (statusCode === 401) {
         console.log('Did not authenticate successfully')
-        res.status(401).json({ success: false, message: 'Not authorized: cloud/securityToken (or user/password) did not authenticate. Is your token or user/password combination correct or could your token have expired?' })
+        res.status(401).json({ message: 'Not authorized: cloud/securityToken (or user/password) did not authenticate. Is your token or user/password combination correct or could your token have expired?' })
         return
       }
-      res.status(statusCode).json({ success: false, message: `Request to cloud failed (${statusCode}).` })
+      res.status(statusCode).json({ message: `Request to cloud failed (${statusCode}).` })
       return
     }
     getResponse.setEncoding('utf8')
@@ -44,12 +44,12 @@ const authenticate = (req, res, next) => {
         console.log(`Successfully authenticated to ${cloud}`)
         return next()
       } else {
-        res.status(417).json({ success: false, message: 'Received unexpected response from cloud.' })
+        res.status(417).json({ message: 'Received unexpected response from cloud.' })
       }
     })
   }).on('error', (e) => {
     console.error(`Got error: ${e.message}`)
-    res.status(424).json({ success: false, message: 'Received unexpected response from cloud.' })
+    res.status(424).json({ message: 'Received unexpected response from cloud.' })
   })
 }
 
@@ -72,22 +72,26 @@ app.get('/api', authenticate, (req, res) => {
   const { cloud, date } = req.query
   const missingParams = !(cloud || date)
   if (missingParams) {
-    res.status(400).json({ success: false, message: 'Missing parameter(s): cloud and date are required.' })
+    res.status(400).json({ message: 'Missing parameter(s): cloud and date are required.' })
     return
   }
   // Try connecting to PostgreSQL
   client.connect(pgConnectionString, err => {
     if (err) {
-      res.status(401).json({ success: false, message: 'Not able to connect to database to retrieve snapshot.' })
+      res.status(401).json({ message: 'Not able to connect to database to retrieve snapshot.' })
       return
     }
     // Run parameterized query to prevent SQL injection
     client.query(`SELECT cloudSnapshot($1, $2::DATE)`, [cloud, date], (err, rows)=> {
       if (err) {
-        res.status(503).send('Not able to retrieve snapshot from database (but connected successfully).')
+        res.status(424).json({ message: 'Not able to retrieve snapshot from database (but connected successfully).' })
         return
       }
-      res.send(rows[0].cloudsnapshot) // Function returns JSON
+      const { cloudsnapshot } = rows[0]
+      if (!cloudsnapshot) {
+        res.status(204).json({ message: 'No snapshot for that cloud/date combination.' })
+      }
+      res.send(cloudsnapshot) // Function returns JSON (already in JSON)
     })
   })
 })
@@ -95,7 +99,7 @@ app.get('/api', authenticate, (req, res) => {
 // Handle HTTP POST of JSON to /api
 app.post('/api', authenticate, (req, res) => {
   if(!req.body) { // Is there content?
-    res.status(444).json({ success: false, message: 'Nothing received.' })
+    res.status(444).json({ message: 'Nothing received.' })
     return
   }
   console.log('Received JSON request.')
@@ -103,17 +107,17 @@ app.post('/api', authenticate, (req, res) => {
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
     if (err) {
-      res.status(401).json({ success: false, message: 'Not able to connect to database to submit snapshot.' })
+      res.status(401).json({ message: 'Not able to connect to database to submit snapshot.' })
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
     client.query(sql, [jsonSnapshot], (err, rows)=> {
       if (err) {
-        res.status(424).json({ success: false, message: 'Not able to submit snapshot to database (but connected successfully).' })
+        res.status(424).json({ message: 'Not able to submit snapshot to database (but connected successfully).' })
         return
       }
       console.log('Processed JSON request.')
-      res.json({ success: true, message: 'JSON received and processed.' })
+      res.status(200).json({ message: 'JSON received and processed.' })
     })
   })
 })
