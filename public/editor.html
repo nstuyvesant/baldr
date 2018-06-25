@@ -23,9 +23,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha256-C8oQVJ33cKtnkARnmeWp6SDChkU+u7KvsNMFUzkkUzk=" crossorigin="anonymous"></script>
   <script>
-    let cloud
-    let securityToken
-
     // Extract querystring values
     function qs (key) {
       key = key.replace(/[*+?^$.[\]{}()|\\/]/g, '\\$&') // escape RegEx meta chars
@@ -33,12 +30,19 @@
       return match && decodeURIComponent(match[1].replace(/\+/g, ' '))
     }
 
+    const cloud = qs('cloud')
+    const securityToken = qs('securityToken')
+    const user = qs('user')
+    const password = qs('password')
+
+    // Favor securityToken over user/password combination
+    const securityParams = securityToken ? '&securityToken=' + securityToken : '&user=' + user + '&password=' + password
+
     // Handle submit on request form
     $('#theForm').on('submit', function (e) {
       e.preventDefault()
-      $.post('/api/?cloud=' + cloud + '&securityToken=' + securityToken, JSON.parse($('#jsonTest').val()), function (response) {
-        if (response.success)
-          alert('Successfully submitted JSON.')
+      $.post('/api/?cloud=' + cloud + securityParams, JSON.parse($('#jsonTest').val()), function (response) {
+        alert(response.message)
       })
       .fail(function(e) {
         alert(e.responseJSON.message)
@@ -47,9 +51,6 @@
 
     // DOM ready
     $(document).ready(function () {
-      cloud = qs('cloud') || ''
-      securityToken = qs('securityToken') || ''
-
       $.getJSON('sample-input.json', function (data) {
         $('#jsonTest').val(JSON.stringify(data))
       })

@@ -240,14 +240,14 @@
         // DOM ready
         $(document).ready(function () {
             // Parse querystring
-            let cloud = qs('cloud')
-            let snapshotDate = qs('date')
-            let securityToken = qs('securityToken')
-            let user = qs('user')
-            let password = qs('password')
+            const cloud = qs('cloud')
+            const snapshotDate = qs('date')
+            const securityToken = qs('securityToken')
+            const user = qs('user')
+            const password = qs('password')
 
             // Favor securityToken over user/password combination
-            securityParams = securityToken ? '&securityToken=' + securityToken : '&user=' + user + '&password=' + password
+            const securityParams = securityToken ? '&securityToken=' + securityToken : '&user=' + user + '&password=' + password
 
             // Load content from our API
             $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate + securityParams, function (reportData) {

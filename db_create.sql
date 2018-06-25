@@ -2,22 +2,18 @@
 -- $ psql -d postgres -f db_create.sql
 
 -- Create user if doesn't exist
--- DO
--- $do$
--- BEGIN
---    IF NOT EXISTS (
---       SELECT                       -- SELECT list can stay empty for this
---       FROM   pg_catalog.pg_roles
---       WHERE  rolname = 'postgres') THEN
+DO
+$do$
+BEGIN
+   IF NOT EXISTS (
+      SELECT                       -- SELECT list can stay empty for this
+      FROM   pg_catalog.pg_roles
+      WHERE  rolname = 'baldr') THEN
 
---       CREATE ROLE postgres LOGIN PASSWORD 'mysecret123';
---    END IF;
--- END
--- $do$;
-
--- ALTER ROLE postgres SUPERUSER;
-
-CREATE USER IF NOT EXISTS baldr;
+      CREATE ROLE baldr;
+   END IF;
+END
+$do$;
 
 -- Forcefully disconnect anyone
 SELECT pid, pg_terminate_backend(pid) 
@@ -29,7 +25,7 @@ DROP DATABASE IF EXISTS vr;
 -- Create database
 CREATE DATABASE vr
     WITH 
-    OWNER = postgres
+    OWNER = baldr
     ENCODING = 'UTF8'
     LC_COLLATE = 'en_US.UTF-8'
     LC_CTYPE = 'en_US.UTF-8'
@@ -67,16 +63,16 @@ COMMENT ON COLUMN public.test_age.cloud_id IS 'Foreign key to cloud';
 COMMENT ON COLUMN public.test_age.first_seen IS 'First date we saw that test';
 
 CREATE TABLE public.snapshots (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    cloud_id uuid NOT NULL REFERENCES clouds(id),
-    snapshot_date date,
-    success_rate smallint,
-    lab_issues bigint,
-    orchestration_issues bigint,
-    scripting_issues bigint,
-    unknowns bigint,
-	executions bigint
-  UNIQUE (cloud_id, snapshot_date)
+	id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	cloud_id uuid NOT NULL REFERENCES clouds(id),
+	snapshot_date date,
+	success_rate smallint,
+	lab_issues bigint,
+	orchestration_issues bigint,
+	scripting_issues bigint,
+	unknowns bigint,
+	executions bigint,
+	UNIQUE (cloud_id, snapshot_date)
 );
 
 COMMENT ON COLUMN public.snapshots.cloud_id IS 'Foreign key to cloud';
@@ -86,7 +82,6 @@ COMMENT ON COLUMN public.snapshots.orchestration_issues IS 'The number of script
 COMMENT ON COLUMN public.snapshots.scripting_issues IS 'The number of script failures due to a problem with the script or framework over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.unknowns IS 'The number of unknown scripts over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.executions IS 'The number of executions over the past 24 hours';
-
 
 CREATE TABLE public.devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -109,12 +109,13 @@ app.post('/api', authenticate, (req, res) => {
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
-    client.query(sql, [jsonSnapshot], (err, rows)=> {
+    client.query(sql, [jsonSnapshot], (err)=> {
       if (err) {
+        console.log(err)
         res.status(424).json({ message: 'Not able to submit snapshot to database (but connected successfully).' })
         return
       }
-      console.log('Processed JSON request.')
+      console.log('JSON received and processed.')
       res.status(200).json({ message: 'JSON received and processed.' })
     })
   })
