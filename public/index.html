@@ -239,13 +239,18 @@
 
         // DOM ready
         $(document).ready(function () {
-            // Get cloud and date values from querystring
+            // Parse querystring
             let cloud = qs('cloud')
             let snapshotDate = qs('date')
             let securityToken = qs('securityToken')
+            let user = qs('user')
+            let password = qs('password')
+
+            // Favor securityToken over user/password combination
+            securityParams = securityToken ? '&securityToken=' + securityToken : '&user=' + user + '&password=' + password
 
             // Load content from our API
-            $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate + '&securityToken=' + securityToken, function (reportData) {
+            $.getJSON('/api/?cloud=' + cloud + '&date=' + snapshotDate + securityParams, function (reportData) {
                 // Show main report (hidden in case we need to show alert due to no data)
                 $('#main').collapse('show')
 

@@ -7,14 +7,11 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet')
 const https = require('https')
-// const url = require('url')
 const port = process.env.NODE_PORT || 3000;
 
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
-  console.log('req.query', req.query)
-  console.log('req.url', req.url)
   // Check if parameters are present - bail out if not
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
@@ -50,7 +47,7 @@ const authenticate = (req, res, next) => {
     })
   }).on('error', (e) => {
     console.error(`Got error: ${e.message}`)
-    res.status(424).json({ message: 'Received unexpected response from cloud.' })
+    res.status(424).json({ message: 'Could not connect to that cloud. Did you specify a valid fully-qualified domain name?' })
   })
 }
 
@@ -61,7 +58,7 @@ app.use(helmet())
 app.use(compression());
 
 // Allow ExpressJS to support JSON but not URL-encoded bodies
-app.use(bodyParser.urlencoded({ extended: false }));
+//app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Serve up any content requested from /public
@@ -92,7 +89,7 @@ app.get('/api', authenticate, (req, res) => {
       if (!cloudsnapshot) {
         res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
       }
-      res.send(cloudsnapshot) // should already be JSON (stringify not necessary)
+      res.status(200).send(cloudsnapshot) // Already JSON (stringify not necessary)
     })
   })
 })
