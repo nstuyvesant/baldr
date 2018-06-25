@@ -7,13 +7,14 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet')
 const https = require('https')
+// const url = require('url')
 const port = process.env.NODE_PORT || 3000;
 
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
   console.log('req.query', req.query)
-  console.log('req.params', req.params)
+  console.log('req.url', req.url)
   // Check if parameters are present - bail out if not
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
@@ -54,14 +55,14 @@ const authenticate = (req, res, next) => {
 }
 
 // Add some basic security
-//app.use(helmet())
+app.use(helmet())
 
 // Compress all routes
 app.use(compression());
 
-// Allow ExpressJS to support JSON and URL-encoded bodies
+// Allow ExpressJS to support JSON but not URL-encoded bodies
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve up any content requested from /public
 app.use(express.static(path.join(__dirname, 'public')))
