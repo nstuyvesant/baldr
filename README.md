@@ -3,7 +3,7 @@
 [![node][node]][node-url]
 
 # Perfecto Reporting
-Named after the Norse God of Light, this server generates daily reports that increase visibility of automation obstacles. The server can be accessed at [https://baldr.perfecto.io/?cloud=FQDN&date=DATE-ISO-8601&securityToken=YOUR-SECURITY-TOKEN](https://baldr.perfecto.io/?cloud=demo.perfectomobile.com&date=2018-06-20&securityToken=) with the appropriate substitutions for the parameters listed.
+Named after the Norse God of Light, this server generates daily reports that increase visibility of automation obstacles. The server can be accessed at [https://baldr.perfecto.io/?cloud=FQDN&date=DATE-ISO-8601&securityToken=YOUR-SECURITY-TOKEN](https://baldr.perfecto.io/?cloud=demo.perfectomobile.com&date=2018-06-20&securityToken=) with the appropriate substitutions for the parameters listed. [This article](https://developers.perfectomobile.com/display/PD/Security+Token) explains how to request a security token.
 
 ## Getting Started
 
@@ -15,7 +15,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 - [PostgreSQL 10.4.0](http://postgresql.org) (`brew install postgresql`)
 - [pgAdmin4 3.0](https://www.postgresql.org/download/) (download and install it)
 
-### Project setup
+### Local Project Setup
 
 1. Launch __Terminal__ on your Mac.
 
