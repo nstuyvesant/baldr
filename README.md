@@ -33,13 +33,13 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 ### Testing
 
-1. To see report populated from the database, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
+1. To retrieve a customer-facing report, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
 
 2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
 
 3. To submit JSON via the API, go to [http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=)
 
-### Production
+### Production Setup
 
 1. To run in production on Ubuntu 18.04, login to your server then type `sudo useradd baldr` to create a low-privileged user.
 
