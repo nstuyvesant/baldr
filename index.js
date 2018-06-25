@@ -53,7 +53,7 @@ const authenticate = (req, res, next) => {
 }
 
 // Add some basic security
-app.use(helmet())
+//app.use(helmet())
 
 // Compress all routes
 app.use(compression());
