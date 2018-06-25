@@ -89,7 +89,7 @@ app.get('/api', authenticate, (req, res) => {
       }
       const { cloudsnapshot } = rows[0]
       if (!cloudsnapshot) {
-        res.status(204).json({ message: 'No snapshot for that cloud/date combination.' })
+        res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
       }
       res.send(cloudsnapshot) // Function returns JSON (already in JSON)
     })
