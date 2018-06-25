@@ -12,8 +12,7 @@ const port = process.env.NODE_PORT || 3000;
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
-  console.log('user parameter sent', !!user)
-  console.log('password parameter sent', !!password)
+  console.log('req.query', req.query)
   // Check if parameters are present - bail out if not
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
@@ -91,7 +90,7 @@ app.get('/api', authenticate, (req, res) => {
       if (!cloudsnapshot) {
         res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
       }
-      res.send(cloudsnapshot) // Function returns JSON (already in JSON)
+      res.send(cloudsnapshot) // should already be JSON (stringify not necessary)
     })
   })
 })
