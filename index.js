@@ -19,7 +19,7 @@ const authenticate = (req, res, next) => {
     return
   }
   securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
-  https.get(`https://${cloud}/services/groups/?operation=list&${securityParams}`, getResponse => {
+  https.get(`https://${cloud}/services/handsets/?operation=list&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
       getResponse.resume() // consume getResponse to free up memory
