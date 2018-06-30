@@ -79,7 +79,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 - [editor.html](https://github.com/nstuyvesant/baldr/blob/master/public/editor.html) - JSON editor page. Submissions from this page are stored in the underlying PostgreSQL database, vr, replacing any contents for the snapshot date.
 
-- [smaple-input.json](https://github.com/nstuyvesant/baldr/blob/master/public/sample-input.json) - JSON sample loaded by default in the editor. It represents the valid format for JSON snapshot upserts.
+- [sample-input.json](https://github.com/nstuyvesant/baldr/blob/master/public/sample-input.json) - JSON sample loaded by default in the editor. It represents the valid format for JSON snapshot upserts.
 
 - [sample-output.json](https://github.com/nstuyvesant/baldr/blob/master/public/sample-output.json) - JSON sample returned by the HTTP GET handler in [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js). The difference from the input are the two properties: last7d and last14d. These are not part of the input as they are calculated from previous daily snapshots.
 
