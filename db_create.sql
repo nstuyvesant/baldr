@@ -44,8 +44,9 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE public.clouds (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    fqdn character varying(255) UNIQUE,
-    last_update date DEFAULT CURRENT_DATE
+    fqdn character varying(255) UNIQUE NOT NULL,
+    last_update date DEFAULT CURRENT_DATE,
+    token character varying(2000)
 );
 
 COMMENT ON COLUMN public.clouds.fqdn IS 'Fully-qualified domain name of the Perfecto cloud';
@@ -53,7 +54,7 @@ COMMENT ON COLUMN public.clouds.last_update IS 'Last time Uzi updated the data';
 
 CREATE TABLE public.test_age (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    cloud_id uuid NOT NULL REFERENCES clouds(id),
+    cloud_id uuid NOT NULL REFERENCES clouds(id) ON DELETE CASCADE,
     test_name character varying(4000) NOT NULL,
     first_seen date DEFAULT CURRENT_DATE NOT NULL,
     UNIQUE (cloud_id, test_name)
@@ -64,14 +65,14 @@ COMMENT ON COLUMN public.test_age.first_seen IS 'First date we saw that test';
 
 CREATE TABLE public.snapshots (
 	id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	cloud_id uuid NOT NULL REFERENCES clouds(id),
-	snapshot_date date,
-	success_rate smallint,
-	lab_issues bigint,
-	orchestration_issues bigint,
-	scripting_issues bigint,
-	unknowns bigint,
-	executions bigint,
+	cloud_id uuid NOT NULL REFERENCES clouds(id) ON DELETE CASCADE,
+	snapshot_date date DEFAULT CURRENT_DATE NOT NULL,
+	success_rate smallint DEFAULT 0,
+	lab_issues bigint DEFAULT 0,
+	orchestration_issues bigint DEFAULT 0,
+	scripting_issues bigint DEFAULT 0,
+	unknowns bigint DEFAULT 0,
+	executions bigint DEFAULT 0,
 	UNIQUE (cloud_id, snapshot_date)
 );
 
@@ -85,14 +86,14 @@ COMMENT ON COLUMN public.snapshots.executions IS 'The number of executions over 
 
 CREATE TABLE public.devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    snapshot_id uuid NOT NULL REFERENCES snapshots(id),
+    snapshot_id uuid NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
     rank smallint DEFAULT 1 NOT NULL,
     model character varying(255) NOT NULL,
     os character varying(255) NOT NULL,
     device_id character varying(255) NOT NULL,
-    passed_executions_last24h bigint NOT NULL,
-    failed_executions_last24h bigint NOT NULL,
-    errors_last24h bigint NOT NULL,
+    passed_executions_last24h bigint DEFAULT 0 NOT NULL,
+    failed_executions_last24h bigint DEFAULT 0 NOT NULL,
+    errors_last24h bigint DEFAULT 0 NOT NULL,
     UNIQUE (snapshot_id, rank)
 );
 
@@ -107,7 +108,7 @@ COMMENT ON COLUMN public.devices.errors_last24h IS 'The number of times the devi
 
 CREATE TABLE public.recommendations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    snapshot_id uuid NOT NULL REFERENCES snapshots(id),
+    snapshot_id uuid NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
     rank smallint DEFAULT 1 NOT NULL,
     recommendation character varying(2000) NOT NULL,
     impact_percentage smallint DEFAULT 0 NOT NULL,
@@ -123,11 +124,11 @@ COMMENT ON COLUMN public.recommendations.impact_message IS 'For recommendations 
 
 CREATE TABLE public.tests (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    snapshot_id uuid NOT NULL REFERENCES snapshots(id),
+    snapshot_id uuid NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
     rank smallint DEFAULT 1 NOT NULL,
     test_name character varying(4000) NOT NULL,
-    failures_last24h bigint NOT NULL,
-    passes_last24h bigint NOT NULL,
+    failures_last24h bigint DEFAULT 0 NOT NULL,
+    passes_last24h bigint DEFAULT 0 NOT NULL,
     UNIQUE (snapshot_id, rank)
 );
 
@@ -137,17 +138,7 @@ COMMENT ON COLUMN public.tests.test_name IS 'Name of the test having issues';
 COMMENT ON COLUMN public.tests.failures_last24h IS 'Number of failures of the test for the last 7 days';
 COMMENT ON COLUMN public.tests.passes_last24h IS 'The number of times the test has passed over the last 7 days';
 
--- Table for Uzi
-CREATE TABLE public.tokens (
-    cloud character varying(255),
-    token character varying(2000)
-)
-WITH (
-    OIDS = FALSE
-);
-
 -- Add indices
-
 CREATE INDEX fki_clouds_fkey ON public.snapshots USING btree (cloud_id);
 CREATE INDEX fki_devices_snapshots_fkey ON public.devices USING btree (snapshot_id);
 CREATE INDEX fki_recommendations_snapshots_fkey ON public.recommendations USING btree (snapshot_id);
