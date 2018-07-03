@@ -102,6 +102,7 @@ app.post('/api', authenticate, (req, res) => {
     return
   }
   console.log('Received JSON request.')
+  console.log('req.body', req.body)
   jsonSnapshot = JSON.stringify(req.body) // convert the body back to JSON
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
@@ -110,7 +111,7 @@ app.post('/api', authenticate, (req, res) => {
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
-    console.log(jsonSnapshot)
+    console.log('jsonSnapshot', jsonSnapshot)
     client.query(sql, [jsonSnapshot], (err)=> {
       if (err) {
         console.log(err)
