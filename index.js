@@ -39,7 +39,7 @@ const authenticate = (req, res, next) => {
     })
     getResponse.on('end', () => {
       const response = JSON.parse(rawData)
-      if (response.groups) { // Authenticated successfully
+      if (response.info) { // Authenticated successfully
         console.log(`Successfully authenticated to ${cloud}`)
         return next()
       } else {
