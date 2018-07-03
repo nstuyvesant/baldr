@@ -19,7 +19,9 @@ const authenticate = (req, res, next) => {
     return
   }
 
+  // Enable either tokens or user/password for authentication
   const securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
+  // Perform REST API operation that returns the smallest amount of JSON (reservations for no one)
   https.get(`https://${cloud}/services/reservations/?operation=list&reservedTo=noone&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
@@ -102,6 +104,9 @@ app.post('/api', authenticate, (req, res) => {
     return
   }
   console.log('Received JSON request.')
+  authorizedToUpsert = req.query.cloud === req.body.fqdn
+  console.log('req.query.cloud === req.body.fqdn', authorizedToUpsert)
+  // TODO: fail if !authorizedToUpsert
   jsonSnapshot = JSON.stringify(req.body) // convert the body back to JSON
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
