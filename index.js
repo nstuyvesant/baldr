@@ -105,8 +105,10 @@ app.post('/api', authenticate, (req, res) => {
   }
   console.log('Received JSON request.')
   authorizedToUpsert = req.query.cloud === req.body.fqdn
-  console.log('req.query.cloud === req.body.fqdn', authorizedToUpsert)
-  // TODO: fail if !authorizedToUpsert
+  if (!authorizedToUpsert) {
+    res.status(401).json({ message: 'You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.' })
+    return
+  }
   jsonSnapshot = JSON.stringify(req.body) // convert the body back to JSON
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
