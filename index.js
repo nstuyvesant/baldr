@@ -18,11 +18,11 @@ const authenticate = (req, res, next) => {
     res.status(401).json({ message: 'Not authorized: cloud, securityToken or user/password parameters missing.' })
     return
   }
+
   const securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
-  https.get(`https://${cloud}/services/handsets/?operation=list&${securityParams}`, getResponse => {
+  https.get(`https://${cloud}/services/reservations/?operation=list&reservedTo=noone&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
-      console.log(getResponse)
       getResponse.resume() // consume getResponse to free up memory
       if (statusCode === 401) {
         console.log('Did not authenticate successfully')
