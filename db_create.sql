@@ -310,14 +310,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Nice view to simplify main inner join
-CREATE VIEW clouds_snapshots AS
+CREATE OR REPLACE VIEW clouds_snapshots AS
     SELECT
         fqdn,
         snapshots.id AS snapshot_id,
         snapshot_date,
         success_rate,
-        (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '7 days')::bigint AS success_last7d,
-        (SELECT AVG(success_rate) FROM snapshots WHERE snapshot_date > CURRENT_DATE - INTERVAL '14 days')::bigint AS success_last14d,
+		    (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
+		      WHERE cloud_id = clouds.id AND snapshot_date > CURRENT_DATE - INTERVAL '7 days')::bigint AS success_last7d,
+        (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
+		      WHERE cloud_id = clouds.id AND snapshot_date > CURRENT_DATE - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
         orchestration_issues,
         scripting_issues,
