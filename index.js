@@ -105,7 +105,6 @@ app.post('/api', authenticate, (req, res) => {
   }
   console.log('Received JSON request.')
   const snapshot = JSON.parse(req.body.snapshot)
-  console.log('snapshot', snapshot)
   authorizedToUpsert = req.query.cloud === snapshot.fqdn
   if (!authorizedToUpsert) {
     res.status(401).json({ message: 'You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.' })
@@ -118,7 +117,6 @@ app.post('/api', authenticate, (req, res) => {
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
-    console.log('jsonSnapshot', req.body.snapshot)
     client.query(sql, [req.body.snapshot], (err)=> {
       if (err) {
         console.log(err)
