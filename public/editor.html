@@ -41,7 +41,7 @@
     // Handle submit on request form
     $('#theForm').on('submit', function (e) {
       e.preventDefault()
-      $.post('/api/?cloud=' + cloud + securityParams, new FormData(this), function (response) {
+      $.post('/api/?cloud=' + cloud + securityParams, $('#theForm').serialize(), function (response) {
         alert(response.message)
       })
       .fail(function(e) {
