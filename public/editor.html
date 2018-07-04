@@ -39,9 +39,10 @@
     const securityParams = securityToken ? '&securityToken=' + securityToken : '&user=' + user + '&password=' + password
 
     // Handle submit on request form
-    $('#theForm').on('submit', function (e) {
+    $('#theForm').on('submit', function () {
       e.preventDefault()
-      $.post('/api/?cloud=' + cloud + securityParams, $('#theForm').serialize(), function (response) {
+      const url = '/api/?cloud=' + cloud + securityParams
+      $.post(url, $('#theForm').serialize(), function (response) {
         alert(response.message)
       })
       .fail(function(e) {
