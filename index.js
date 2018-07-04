@@ -105,13 +105,12 @@ app.post('/api', authenticate, (req, res) => {
   }
   console.log('Received JSON request.')
   const snapshot = JSON.parse(req.body.snapshot)
-  console('snapshot', snapshot)
+  console.log('snapshot', snapshot)
   authorizedToUpsert = req.query.cloud === snapshot.fqdn
   if (!authorizedToUpsert) {
     res.status(401).json({ message: 'You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.' })
     return
   }
-  jsonSnapshot = JSON.stringify(snapshot) // convert the body back to JSON
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
     if (err) {
@@ -119,8 +118,8 @@ app.post('/api', authenticate, (req, res) => {
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
-    console.log('jsonSnapshot', jsonSnapshot)
-    client.query(sql, [jsonSnapshot], (err)=> {
+    console.log('jsonSnapshot', req.body.snapshot)
+    client.query(sql, [req.body.snapshot], (err)=> {
       if (err) {
         console.log(err)
         res.status(424).json({ message: 'Not able to submit snapshot to database (but connected successfully).' })
