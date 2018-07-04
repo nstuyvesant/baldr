@@ -61,7 +61,7 @@ app.use(helmet())
 app.use(compression());
 
 // Allow ExpressJS to support JSON but not URL-encoded bodies
-app.use(bodyParser.urlencoded({ extended: false })); // required for POST
+//app.use(bodyParser.urlencoded({ extended: false })); // required for POST
 app.use(bodyParser.json());
 
 // Serve up any content requested from /public
