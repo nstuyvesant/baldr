@@ -98,19 +98,20 @@ app.get('/api', authenticate, (req, res) => {
 
 // Handle HTTP POST of JSON to /api
 app.post('/api', authenticate, (req, res) => {
-  console.log('req.body', req.body)
   console.log('req.body.snapshot', req.body.snapshot)
-  if(!req.body) { // Is there content?
+  if(!req.body.snapshot) { // Is there content?
     res.status(444).json({ message: 'Nothing received.' })
     return
   }
   console.log('Received JSON request.')
-  authorizedToUpsert = req.query.cloud === req.body.fqdn
+  const snapshot = JSON.parse(req.body.snapshot)
+  console('snapshot', snapshot)
+  authorizedToUpsert = req.query.cloud === snapshot.fqdn
   if (!authorizedToUpsert) {
     res.status(401).json({ message: 'You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.' })
     return
   }
-  jsonSnapshot = JSON.stringify(req.body) // convert the body back to JSON
+  jsonSnapshot = JSON.stringify(snapshot) // convert the body back to JSON
   let client = new Client()
   client.connect(pgConnectionString, (err) => {
     if (err) {
