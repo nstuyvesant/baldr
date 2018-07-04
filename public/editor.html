@@ -12,8 +12,8 @@
       <div class="row">
         <div class="col-md-12">
           <div class="form-group">
-            <label for="jsonTest">JSON Snapshot to Upsert</label>
-            <textarea class="form-control" id="jsonTest" name="jsonTest" rows="25"></textarea>
+            <label for="snapshot">JSON Snapshot to Upsert</label>
+            <textarea class="form-control" id="snapshot" name="snapshot" rows="25"></textarea>
           </div>
           <button class="btn btn-success" type="submit">Submit</button>
         </div>
@@ -41,7 +41,7 @@
     // Handle submit on request form
     $('#theForm').on('submit', function (e) {
       e.preventDefault()
-      $.post('/api/?cloud=' + cloud + securityParams, JSON.parse($('#jsonTest').val()), function (response) {
+      $.post('/api/?cloud=' + cloud + securityParams, new FormData(this), function (response) {
         alert(response.message)
       })
       .fail(function(e) {
@@ -52,7 +52,7 @@
     // DOM ready
     $(document).ready(function () {
       $.getJSON('sample-input.json', function (data) {
-        $('#jsonTest').val(JSON.stringify(data))
+        $('#snapshot').val(JSON.stringify(data))
       })
     })
   </script>
