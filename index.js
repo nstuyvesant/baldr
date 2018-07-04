@@ -99,6 +99,7 @@ app.get('/api', authenticate, (req, res) => {
 
 // Handle HTTP POST of JSON to /api
 app.post('/api', authenticate, (req, res) => {
+  console.log('req.body', req.body)
   if(!req.body) { // Is there content?
     res.status(444).json({ message: 'Nothing received.' })
     return
