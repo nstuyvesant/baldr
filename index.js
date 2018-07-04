@@ -117,6 +117,7 @@ app.post('/api', authenticate, (req, res) => {
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
+    console.log('req.body', req.body)
     console.log('jsonSnapshot', jsonSnapshot)
     client.query(sql, [jsonSnapshot], (err)=> {
       if (err) {
