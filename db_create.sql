@@ -312,6 +312,7 @@ $$ LANGUAGE plpgsql;
 -- Nice view to simplify main inner join
 CREATE OR REPLACE VIEW clouds_snapshots AS
     SELECT
+        clouds.id AS cloud_id,
         fqdn,
         snapshots.id AS snapshot_id,
         snapshot_date,
@@ -357,9 +358,9 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
             (
                 SELECT array_to_json(array_agg(row_to_json(t)))
                 FROM (
-                    SELECT rank, tests.test_name AS test, DATE_PART('day', CURRENT_DATE) - DATE_PART('day', first_seen) AS age, failures_last24h AS failures, passes_last24h as passes
+                    SELECT rank, tests.test_name AS test, CURRENT_DATE - first_seen AS age, failures_last24h AS failures, passes_last24h as passes
                     FROM tests INNER JOIN test_age ON tests.test_name = test_age.test_name
-                    WHERE tests.snapshot_id = clouds_snapshots.snapshot_id
+                    WHERE tests.snapshot_id = clouds_snapshots.snapshot_id AND test_age.cloud_id = clouds_snapshots.cloud_id
                     ORDER BY rank ASC
                 ) t
             ) AS "topFailingTests"
@@ -378,8 +379,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO baldr;
 BEGIN; -- Start a transaction
 
 -- Show how to populate test data using JSON - alternative to the functions in populate_test_data()
-SELECT json_snapshot_upsert('
-{
+SELECT json_snapshot_upsert('{
 	"fqdn": "demo.perfectomobile.com",
 	"snapshotDate": "2018-06-19",
 	"last24h": 37,
@@ -481,11 +481,9 @@ SELECT json_snapshot_upsert('
 		"failures": 41,
 		"passes": 25
 	}]
-}
-'::json);
+}'::json);
 
-SELECT json_snapshot_upsert('
-{
+SELECT json_snapshot_upsert('{
 	"fqdn": "demo.perfectomobile.com",
 	"snapshotDate": "2018-06-20",
 	"last24h": 89,
@@ -587,8 +585,7 @@ SELECT json_snapshot_upsert('
 		"failures": 41,
 		"passes": 25
 	}]
-}
-'::json);
+}'::json);
 
 COMMIT;
 
