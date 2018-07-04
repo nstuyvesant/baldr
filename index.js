@@ -3,7 +3,6 @@ const Client = require('pg-native')
 const app = express()
 const path = require('path')
 const pgConnectionString = 'postgresql://baldr@:5432/vr'
-const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet')
 const https = require('https')
@@ -61,7 +60,6 @@ app.use(helmet())
 app.use(compression());
 
 // Allow ExpressJS to support JSON but not URL-encoded bodies
-//app.use(bodyParser.urlencoded({ extended: false })); // required for POST
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
 
@@ -119,7 +117,6 @@ app.post('/api', authenticate, (req, res) => {
       return
     }
     let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
-    console.log('req.body', req.body)
     console.log('jsonSnapshot', jsonSnapshot)
     client.query(sql, [jsonSnapshot], (err)=> {
       if (err) {
