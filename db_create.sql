@@ -318,9 +318,9 @@ CREATE OR REPLACE VIEW clouds_snapshots AS
         snapshot_date,
         success_rate,
 		    (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
-		      WHERE cloud_id = clouds.id AND snapshot_date > CURRENT_DATE - INTERVAL '7 days')::bigint AS success_last7d,
+		      WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '7 days')::bigint AS success_last7d,
         (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
-		      WHERE cloud_id = clouds.id AND snapshot_date > CURRENT_DATE - INTERVAL '14 days')::bigint AS success_last14d,
+		      WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
         orchestration_issues,
         scripting_issues,
