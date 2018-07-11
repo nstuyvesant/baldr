@@ -18,10 +18,17 @@ const authenticate = (req, res, next) => {
     return
   }
 
+  let fqdn
+  if (user && user.includes('@perfectomobile.com')) {
+    fqdn = 'demo.perfectomobile.com'
+  } else {
+    fqdn = cloud
+  }
+
   // Enable either tokens or user/password for authentication
   const securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
   // Perform REST API operation that returns the smallest amount of JSON (reservations for no one)
-  https.get(`https://${cloud}/services/reservations/?operation=list&reservedTo=noone&${securityParams}`, getResponse => {
+  https.get(`https://${fqdn}/services/reservations/?operation=list&reservedTo=noone&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
       getResponse.resume() // consume getResponse to free up memory
@@ -41,7 +48,7 @@ const authenticate = (req, res, next) => {
     getResponse.on('end', () => {
       const response = JSON.parse(rawData)
       if (response.info) { // Authenticated successfully
-        console.log(`Successfully authenticated to ${cloud}`)
+        console.log(`Successfully authenticated to ${fqdn}`)
         return next()
       } else {
         res.status(417).json({ message: 'Received unexpected response from cloud.' })
