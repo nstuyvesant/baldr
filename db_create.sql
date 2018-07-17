@@ -46,7 +46,8 @@ CREATE TABLE public.clouds (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     fqdn character varying(255) UNIQUE NOT NULL,
     last_update date DEFAULT CURRENT_DATE,
-    token character varying(2000)
+    token character varying(2000),
+    token_issue boolean DEFAULT false
 );
 
 COMMENT ON COLUMN public.clouds.fqdn IS 'Fully-qualified domain name of the Perfecto cloud';
@@ -73,6 +74,9 @@ CREATE TABLE public.snapshots (
 	scripting_issues bigint DEFAULT 0,
 	unknowns bigint DEFAULT 0,
 	executions bigint DEFAULT 0,
+  score_automation smallint DEFAULT 0,
+  score_maturity smallint DEFAULT 0,
+  score_quality smallint DEFAULT 0,
 	UNIQUE (cloud_id, snapshot_date)
 );
 
