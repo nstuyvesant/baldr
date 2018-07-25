@@ -73,7 +73,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 15. Create a new cron job for the report analyser jar :  "0 0 * * *  cd /home/baldr/uploader/; java -jar ReportAnalyzer-3.0.jar"
 
-16. Create a new Cron job for the to populate the quality score "0 2 * * *  python /home/baldr/python/score_quality.py"
+16. Create a new Cron job that populates the quality score "0 2 * * *  python /home/baldr/python/score_quality.py"
 
 
 
