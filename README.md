@@ -71,6 +71,12 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 14. Test by typing `curl https://fqdn/editor.html`
 
+15. Create a new cron job for the report analyser jar :  "0 0 * * *  cd /home/baldr/uploader/; java -jar ReportAnalyzer-3.0.jar"
+
+16. Create a new Cron job for the to populate the quality score "0 2 * * *  python /home/baldr/python/score_quality.py"
+
+
+
 ### Overview of files
 
 - [db_create.sql](https://github.com/nstuyvesant/baldr/blob/master/db_create.sql) - Creates the PostgreSQL database, functions to generate JSON and populates with sample data
