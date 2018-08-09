@@ -74,9 +74,9 @@ CREATE TABLE public.snapshots (
 	scripting_issues bigint DEFAULT 0,
 	unknowns bigint DEFAULT 0,
 	executions bigint DEFAULT 0,
-  score_automation smallint DEFAULT 0,
-  score_maturity smallint DEFAULT 0,
-  score_quality smallint DEFAULT 0,
+        score_automation smallint DEFAULT 0,
+        score_maturity smallint DEFAULT 0,
+        score_quality smallint DEFAULT 0,
 	UNIQUE (cloud_id, snapshot_date)
 );
 
