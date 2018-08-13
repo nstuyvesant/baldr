@@ -74,10 +74,16 @@ CREATE TABLE public.snapshots (
 	scripting_issues bigint DEFAULT 0,
 	unknowns bigint DEFAULT 0,
 	executions bigint DEFAULT 0,
+<<<<<<< HEAD
   score_automation smallint DEFAULT 0,
   score_usage smallint DEFAULT 0,
   score_quality smallint DEFAULT 0,
   score_formula json DEFAULT '{}'::json,
+=======
+        score_automation smallint DEFAULT 0,
+        score_maturity smallint DEFAULT 0,
+        score_quality smallint DEFAULT 0,
+>>>>>>> 92380182c403eeb47538b200b6fc55fde38259c9
 	UNIQUE (cloud_id, snapshot_date)
 );
 
@@ -179,12 +185,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create snapshot or update if one exists
-CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
+CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
 BEGIN
-    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions)
-        VALUES ($1, $2, $3, $4, $5, $6 ,$7, $8)
+    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions ,score_quality)
+        VALUES ($1, $2, $3, $4, $5, $6 ,$7, $8 , $9)
             ON CONFLICT (cloud_id, snapshot_date)
-                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8
+                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8 , score_quality = $9
             RETURNING id INTO snapshot_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -238,7 +244,8 @@ BEGIN
         (input->>'orchestration')::integer,
         (input->>'scripting')::integer,
         (input->>'unknowns')::integer,
-		(input->>'executions')::integer
+		(input->>'executions')::integer,
+		(input->>'score_quality')::integer
     );
     -- Delete records related to existing snapshot (as this will overwrite)
     DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
@@ -297,7 +304,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
 DECLARE
     cloud_id uuid := cloud_upsert('demo.perfectomobile.com');
-    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-20'::DATE, 37, 10, 20, 30, 12, 1230);
+    snapshot_id uuid := snapshot_add(cloud_id, '2018-06-20'::DATE, 37, 10, 20, 30, 12, 1230,98);
 BEGIN
     PERFORM device_add(snapshot_id, 1, 'iPhone-5S', 'iOS 9.2.1', '544cc6c6026af23c11f5ed6387df5d5f724f60fb', 0, 25, 10);
     PERFORM device_add(snapshot_id, 2, 'Galaxy S5', 'Android 5.0', 'B5DED881', 0, 23, 23);
@@ -331,6 +338,7 @@ CREATE OR REPLACE VIEW clouds_snapshots AS
         (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
 		      WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
+        score_quality,
         orchestration_issues,
         scripting_issues,
         unknowns,
@@ -344,7 +352,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
     SELECT row_to_json(s) FROM (
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
-            success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab, orchestration_issues AS orchestration,
+            success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab,score_quality, orchestration_issues AS orchestration,
             scripting_issues AS scripting, unknowns, executions,
             (
                 SELECT array_to_json(array_agg(row_to_json(r)))
@@ -397,6 +405,7 @@ SELECT json_snapshot_upsert('{
 	"scripting": 30,
 	"unknowns": 12,
 	"executions": 1230,
+	"score_quality": 89,
 	"recommendations": [{
 		"rank": 1,
 		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
@@ -497,6 +506,7 @@ SELECT json_snapshot_upsert('{
 	"snapshotDate": "2018-06-20",
 	"last24h": 89,
 	"lab": 11,
+	"score_quality": 30,
 	"orchestration": 21,
 	"scripting": 31,
 	"unknowns": 13,
