@@ -65,19 +65,23 @@ COMMENT ON COLUMN public.test_age.cloud_id IS 'Foreign key to cloud';
 COMMENT ON COLUMN public.test_age.first_seen IS 'First date we saw that test';
 
 CREATE TABLE public.snapshots (
-	id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	cloud_id uuid NOT NULL REFERENCES clouds(id) ON DELETE CASCADE,
-	snapshot_date date DEFAULT CURRENT_DATE NOT NULL,
-	success_rate smallint DEFAULT 0,
-	lab_issues bigint DEFAULT 0,
-	orchestration_issues bigint DEFAULT 0,
-	scripting_issues bigint DEFAULT 0,
-	unknowns bigint DEFAULT 0,
-	executions bigint DEFAULT 0,
-        score_automation smallint DEFAULT 0,
-        score_maturity smallint DEFAULT 0,
-        score_experience smallint DEFAULT 0,
-	UNIQUE (cloud_id, snapshot_date)
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  cloud_id uuid NOT NULL REFERENCES clouds(id) ON DELETE CASCADE,
+  snapshot_date date DEFAULT CURRENT_DATE NOT NULL,
+  success_rate smallint DEFAULT 0,
+  lab_issues bigint DEFAULT 0,
+  orchestration_issues bigint DEFAULT 0,
+  scripting_issues bigint DEFAULT 0,
+  unknowns bigint DEFAULT 0,
+  executions bigint DEFAULT 0,
+  score_automation smallint DEFAULT 0,
+  score_experience smallint DEFAULT 0,
+  score_usage smallint DEFAULT 0,
+  score_formula json DEFAULT '{}'::json,
+  score_automation smallint DEFAULT 0,
+  score_experience smallint DEFAULT 0,
+  score_usage smallint DEFAULT 0,
+  UNIQUE (cloud_id, snapshot_date)
 );
 
 COMMENT ON COLUMN public.snapshots.cloud_id IS 'Foreign key to cloud';
@@ -87,6 +91,9 @@ COMMENT ON COLUMN public.snapshots.orchestration_issues IS 'The number of script
 COMMENT ON COLUMN public.snapshots.scripting_issues IS 'The number of script failures due to a problem with the script or framework over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.unknowns IS 'The number of unknown scripts over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.executions IS 'The number of executions over the past 24 hours';
+COMMENT ON COLUMN public.snapshots.score_automation IS '0 to 100 score for automation health';
+COMMENT ON COLUMN public.snapshots.score_experience IS '0 to 100 score for how many defects, outages, etc. customer has experienced';
+COMMENT ON COLUMN public.snapshots.score_usage IS '0 to 100 score for usage health';
 
 CREATE TABLE public.devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -187,11 +194,11 @@ $$ LANGUAGE plpgsql;
 -- Delete snapshot
 CREATE OR REPLACE FUNCTION snapshot_delete(uuid, OUT done boolean) AS $$
 BEGIN
-	DELETE FROM snapshots WHERE snapshot_id = $1;
+  DELETE FROM snapshots WHERE snapshot_id = $1;
     DELETE FROM recommendations WHERE snapshot_id = $1;
     DELETE FROM devices WHERE snapshot_id = $1;
     DELETE FROM tests WHERE snapshot_id = $1;
-	done := true;
+  done := true;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -233,8 +240,8 @@ BEGIN
         (input->>'orchestration')::integer,
         (input->>'scripting')::integer,
         (input->>'unknowns')::integer,
-		(input->>'executions')::integer,
-		(input->>'score_experience')::integer
+    (input->>'executions')::integer,
+    (input->>'score_experience')::integer
     );
     -- Delete records related to existing snapshot (as this will overwrite)
     DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
@@ -322,16 +329,19 @@ CREATE OR REPLACE VIEW clouds_snapshots AS
         snapshots.id AS snapshot_id,
         snapshot_date,
         success_rate,
-		    (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
-		      WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '7 days')::bigint AS success_last7d,
+        (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
+          WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '7 days')::bigint AS success_last7d,
         (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
-		      WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '14 days')::bigint AS success_last14d,
+          WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
         score_experience,
         orchestration_issues,
         scripting_issues,
         unknowns,
-		executions
+        executions,
+        score_automation,
+        score_experience,
+        score_usage
     FROM clouds
     INNER JOIN
         snapshots ON clouds.id = snapshots.cloud_id;
@@ -386,213 +396,213 @@ BEGIN; -- Start a transaction
 
 -- Show how to populate test data using JSON - alternative to the functions in populate_test_data()
 SELECT json_snapshot_upsert('{
-	"fqdn": "demo.perfectomobile.com",
-	"snapshotDate": "2018-06-19",
-	"last24h": 37,
-	"lab": 10,
-	"orchestration": 20,
-	"scripting": 30,
-	"unknowns": 12,
-	"executions": 1230,
-	"score_experience": 89,
-	"recommendations": [{
-		"rank": 1,
-		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
-		"impact": 30,
-		"impactMessage": null
-	}, {
-		"rank": 2,
-		"recommendation": "Use smart check for busy devices",
-		"impact": 15,
-		"impactMessage": null
-	}, {
-		"rank": 3,
-		"recommendation": "Remediate TransferMoney test",
-		"impact": 12,
-		"impactMessage": null
-	}, {
-		"rank": 4,
-		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
-		"impact": 6,
-		"impactMessage": null
-	}, {
-		"rank": 5,
-		"recommendation": "Ensure tests use Digitalzoom API",
-		"impact": 0,
-		"impactMessage": "Eliminate 720 Unknowns"
-	}],
-	"topProblematicDevices": [{
-		"rank": 1,
-		"model": "iPhone-5S",
-		"os": "iOS 9.2.1",
-		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
-		"passed": 0,
-		"failed": 25,
-		"errors": 10
-	}, {
-		"rank": 2,
-		"model": "Galaxy S5",
-		"os": "Android 5.0",
-		"id": "B5DED881",
-		"passed": 0,
-		"failed": 23,
-		"errors": 23
-	}, {
-		"rank": 3,
-		"model": "Galaxy Note III",
-		"os": "Android 4.4",
-		"id": "61F1BF00",
-		"passed": 1,
-		"failed": 15,
-		"errors": 10
-	}, {
-		"rank": 4,
-		"model": "Nexus 5",
-		"os": "Android 5.0",
-		"id": "06B25936007418BB",
-		"passed": 2,
-		"failed": 13,
-		"errors": 9
-	}, {
-		"rank": 5,
-		"model": "iPhone-6",
-		"os": "iOS 9.1",
-		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
-		"passed": 2,
-		"failed": 12,
-		"errors": 8
-	}],
-	"topFailingTests": [{
-		"rank": 1,
-		"test": "TransferMoney",
-		"failures": 75,
-		"passes": 0
-	}, {
-		"rank": 2,
-		"test": "FindBranch",
-		"failures": 71,
-		"passes": 3
-	}, {
-		"rank": 3,
-		"test": "HonkHorn",
-		"failures": 68,
-		"passes": 13
-	}, {
-		"rank": 4,
-		"test": "InsuranceSearch",
-		"failures": 7,
-		"passes": 0
-	}, {
-		"rank": 5,
-		"test": "RemoteStart",
-		"failures": 41,
-		"passes": 25
-	}]
+  "fqdn": "demo.perfectomobile.com",
+  "snapshotDate": "2018-06-19",
+  "last24h": 37,
+  "lab": 10,
+  "orchestration": 20,
+  "scripting": 30,
+  "unknowns": 12,
+  "executions": 1230,
+  "score_experience": 89,
+  "recommendations": [{
+    "rank": 1,
+    "recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+    "impact": 30,
+    "impactMessage": null
+  }, {
+    "rank": 2,
+    "recommendation": "Use smart check for busy devices",
+    "impact": 15,
+    "impactMessage": null
+  }, {
+    "rank": 3,
+    "recommendation": "Remediate TransferMoney test",
+    "impact": 12,
+    "impactMessage": null
+  }, {
+    "rank": 4,
+    "recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+    "impact": 6,
+    "impactMessage": null
+  }, {
+    "rank": 5,
+    "recommendation": "Ensure tests use Digitalzoom API",
+    "impact": 0,
+    "impactMessage": "Eliminate 720 Unknowns"
+  }],
+  "topProblematicDevices": [{
+    "rank": 1,
+    "model": "iPhone-5S",
+    "os": "iOS 9.2.1",
+    "id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+    "passed": 0,
+    "failed": 25,
+    "errors": 10
+  }, {
+    "rank": 2,
+    "model": "Galaxy S5",
+    "os": "Android 5.0",
+    "id": "B5DED881",
+    "passed": 0,
+    "failed": 23,
+    "errors": 23
+  }, {
+    "rank": 3,
+    "model": "Galaxy Note III",
+    "os": "Android 4.4",
+    "id": "61F1BF00",
+    "passed": 1,
+    "failed": 15,
+    "errors": 10
+  }, {
+    "rank": 4,
+    "model": "Nexus 5",
+    "os": "Android 5.0",
+    "id": "06B25936007418BB",
+    "passed": 2,
+    "failed": 13,
+    "errors": 9
+  }, {
+    "rank": 5,
+    "model": "iPhone-6",
+    "os": "iOS 9.1",
+    "id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+    "passed": 2,
+    "failed": 12,
+    "errors": 8
+  }],
+  "topFailingTests": [{
+    "rank": 1,
+    "test": "TransferMoney",
+    "failures": 75,
+    "passes": 0
+  }, {
+    "rank": 2,
+    "test": "FindBranch",
+    "failures": 71,
+    "passes": 3
+  }, {
+    "rank": 3,
+    "test": "HonkHorn",
+    "failures": 68,
+    "passes": 13
+  }, {
+    "rank": 4,
+    "test": "InsuranceSearch",
+    "failures": 7,
+    "passes": 0
+  }, {
+    "rank": 5,
+    "test": "RemoteStart",
+    "failures": 41,
+    "passes": 25
+  }]
 }'::json);
 
 SELECT json_snapshot_upsert('{
-	"fqdn": "demo.perfectomobile.com",
-	"snapshotDate": "2018-06-20",
-	"last24h": 89,
-	"lab": 11,
-	"score_experience": 30,
-	"orchestration": 21,
-	"scripting": 31,
-	"unknowns": 13,
-	"executions": 1028,
-	"recommendations": [{
-		"rank": 1,
-		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
-		"impact": 30,
-		"impactMessage": null
-	}, {
-		"rank": 2,
-		"recommendation": "Use smart check for busy devices",
-		"impact": 15,
-		"impactMessage": null
-	}, {
-		"rank": 3,
-		"recommendation": "Remediate TransferMoney test",
-		"impact": 12,
-		"impactMessage": null
-	}, {
-		"rank": 4,
-		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
-		"impact": 6,
-		"impactMessage": null
-	}, {
-		"rank": 5,
-		"recommendation": "Ensure tests use Digitalzoom API",
-		"impact": 0,
-		"impactMessage": "Eliminate 720 Unknowns"
-	}],
-	"topProblematicDevices": [{
-		"rank": 1,
-		"model": "iPhone-5S",
-		"os": "iOS 9.2.1",
-		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
-		"passed": 0,
-		"failed": 25,
-		"errors": 10
-	}, {
-		"rank": 2,
-		"model": "Galaxy S5",
-		"os": "Android 5.0",
-		"id": "B5DED881",
-		"passed": 0,
-		"failed": 23,
-		"errors": 23
-	}, {
-		"rank": 3,
-		"model": "Galaxy Note III",
-		"os": "Android 4.4",
-		"id": "61F1BF00",
-		"passed": 1,
-		"failed": 15,
-		"errors": 10
-	}, {
-		"rank": 4,
-		"model": "Nexus 5",
-		"os": "Android 5.0",
-		"id": "06B25936007418BB",
-		"passed": 2,
-		"failed": 13,
-		"errors": 9
-	}, {
-		"rank": 5,
-		"model": "iPhone-6",
-		"os": "iOS 9.1",
-		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
-		"passed": 2,
-		"failed": 12,
-		"errors": 8
-	}],
-	"topFailingTests": [{
-		"rank": 1,
-		"test": "TransferMoney",
-		"failures": 75,
-		"passes": 0
-	}, {
-		"rank": 2,
-		"test": "FindBranch",
-		"failures": 71,
-		"passes": 3
-	}, {
-		"rank": 3,
-		"test": "HonkHorn",
-		"failures": 68,
-		"passes": 13
-	}, {
-		"rank": 4,
-		"test": "InsuranceSearch",
-		"failures": 7,
-		"passes": 0
-	}, {
-		"rank": 5,
-		"test": "RemoteStart",
-		"failures": 41,
-		"passes": 25
-	}]
+  "fqdn": "demo.perfectomobile.com",
+  "snapshotDate": "2018-06-20",
+  "last24h": 89,
+  "lab": 11,
+  "score_experience": 30,
+  "orchestration": 21,
+  "scripting": 31,
+  "unknowns": 13,
+  "executions": 1028,
+  "recommendations": [{
+    "rank": 1,
+    "recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+    "impact": 30,
+    "impactMessage": null
+  }, {
+    "rank": 2,
+    "recommendation": "Use smart check for busy devices",
+    "impact": 15,
+    "impactMessage": null
+  }, {
+    "rank": 3,
+    "recommendation": "Remediate TransferMoney test",
+    "impact": 12,
+    "impactMessage": null
+  }, {
+    "rank": 4,
+    "recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+    "impact": 6,
+    "impactMessage": null
+  }, {
+    "rank": 5,
+    "recommendation": "Ensure tests use Digitalzoom API",
+    "impact": 0,
+    "impactMessage": "Eliminate 720 Unknowns"
+  }],
+  "topProblematicDevices": [{
+    "rank": 1,
+    "model": "iPhone-5S",
+    "os": "iOS 9.2.1",
+    "id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+    "passed": 0,
+    "failed": 25,
+    "errors": 10
+  }, {
+    "rank": 2,
+    "model": "Galaxy S5",
+    "os": "Android 5.0",
+    "id": "B5DED881",
+    "passed": 0,
+    "failed": 23,
+    "errors": 23
+  }, {
+    "rank": 3,
+    "model": "Galaxy Note III",
+    "os": "Android 4.4",
+    "id": "61F1BF00",
+    "passed": 1,
+    "failed": 15,
+    "errors": 10
+  }, {
+    "rank": 4,
+    "model": "Nexus 5",
+    "os": "Android 5.0",
+    "id": "06B25936007418BB",
+    "passed": 2,
+    "failed": 13,
+    "errors": 9
+  }, {
+    "rank": 5,
+    "model": "iPhone-6",
+    "os": "iOS 9.1",
+    "id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+    "passed": 2,
+    "failed": 12,
+    "errors": 8
+  }],
+  "topFailingTests": [{
+    "rank": 1,
+    "test": "TransferMoney",
+    "failures": 75,
+    "passes": 0
+  }, {
+    "rank": 2,
+    "test": "FindBranch",
+    "failures": 71,
+    "passes": 3
+  }, {
+    "rank": 3,
+    "test": "HonkHorn",
+    "failures": 68,
+    "passes": 13
+  }, {
+    "rank": 4,
+    "test": "InsuranceSearch",
+    "failures": 7,
+    "passes": 0
+  }, {
+    "rank": 5,
+    "test": "RemoteStart",
+    "failures": 41,
+    "passes": 25
+  }]
 }'::json);
 
 COMMIT;
