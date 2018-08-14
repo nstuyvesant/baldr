@@ -76,7 +76,7 @@ CREATE TABLE public.snapshots (
 	executions bigint DEFAULT 0,
   score_automation smallint DEFAULT 0,
   score_usage smallint DEFAULT 0,
-  score_quality smallint DEFAULT 0,
+  score_experience smallint DEFAULT 0,
   score_formula json DEFAULT '{}'::json,
 	UNIQUE (cloud_id, snapshot_date)
 );
@@ -90,7 +90,7 @@ COMMENT ON COLUMN public.snapshots.unknowns IS 'The number of unknown scripts ov
 COMMENT ON COLUMN public.snapshots.executions IS 'The number of executions over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.score_automation IS '0 to 100 score for automation';
 COMMENT ON COLUMN public.snapshots.score_usage IS '0 to 100 score for usage';
-COMMENT ON COLUMN public.snapshots.score_quality IS '0 to 100 score for quality';
+COMMENT ON COLUMN public.snapshots.score_experience IS '0 to 100 score for experience (defects, outages, service degradations, etc.)';
 COMMENT ON COLUMN public.snapshots.score_formula IS 'JSON to store components that led to the automation, usage, and quality scores so we recalculate in the future if weights change';
 
 CREATE TABLE public.devices (
