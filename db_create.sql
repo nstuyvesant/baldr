@@ -339,9 +339,9 @@ CREATE OR REPLACE VIEW clouds_snapshots AS
         scripting_issues,
         unknowns,
         executions,
-        score_automation,
-        score_experience,
-        score_usage
+        score_automation AS automation,
+        score_experience AS experience,
+        score_usage AS usage
     FROM clouds
     INNER JOIN
         snapshots ON clouds.id = snapshots.cloud_id;
@@ -352,7 +352,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
             success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab,score_experience, orchestration_issues AS orchestration,
-            scripting_issues AS scripting, unknowns, executions,
+            scripting_issues AS scripting, unknowns, executions, automation, experience, usage
             (
                 SELECT array_to_json(array_agg(row_to_json(r)))
                 FROM (
