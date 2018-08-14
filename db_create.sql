@@ -74,10 +74,9 @@ CREATE TABLE public.snapshots (
 	scripting_issues bigint DEFAULT 0,
 	unknowns bigint DEFAULT 0,
 	executions bigint DEFAULT 0,
-  score_automation smallint DEFAULT 0,
-  score_usage smallint DEFAULT 0,
-  score_experience smallint DEFAULT 0,
-  score_formula json DEFAULT '{}'::json,
+        score_automation smallint DEFAULT 0,
+        score_maturity smallint DEFAULT 0,
+        score_experience smallint DEFAULT 0,
 	UNIQUE (cloud_id, snapshot_date)
 );
 
@@ -88,10 +87,6 @@ COMMENT ON COLUMN public.snapshots.orchestration_issues IS 'The number of script
 COMMENT ON COLUMN public.snapshots.scripting_issues IS 'The number of script failures due to a problem with the script or framework over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.unknowns IS 'The number of unknown scripts over the past 24 hours';
 COMMENT ON COLUMN public.snapshots.executions IS 'The number of executions over the past 24 hours';
-COMMENT ON COLUMN public.snapshots.score_automation IS '0 to 100 score for automation';
-COMMENT ON COLUMN public.snapshots.score_usage IS '0 to 100 score for usage';
-COMMENT ON COLUMN public.snapshots.score_experience IS '0 to 100 score for experience (defects, outages, service degradations, etc.)';
-COMMENT ON COLUMN public.snapshots.score_formula IS 'JSON to store components that led to the automation, usage, and quality scores so we recalculate in the future if weights change';
 
 CREATE TABLE public.devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -181,10 +176,10 @@ $$ LANGUAGE plpgsql;
 -- Create snapshot or update if one exists
 CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
 BEGIN
-    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions ,score_quality)
+    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions ,score_experience)
         VALUES ($1, $2, $3, $4, $5, $6 ,$7, $8 , $9)
             ON CONFLICT (cloud_id, snapshot_date)
-                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8 , score_quality = $9
+                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8 , score_experience = $9
             RETURNING id INTO snapshot_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -239,7 +234,7 @@ BEGIN
         (input->>'scripting')::integer,
         (input->>'unknowns')::integer,
 		(input->>'executions')::integer,
-		(input->>'score_quality')::integer
+		(input->>'score_experience')::integer
     );
     -- Delete records related to existing snapshot (as this will overwrite)
     DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
@@ -332,7 +327,7 @@ CREATE OR REPLACE VIEW clouds_snapshots AS
         (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
 		      WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '14 days')::bigint AS success_last14d,
         lab_issues,
-        score_quality,
+        score_experience,
         orchestration_issues,
         scripting_issues,
         unknowns,
@@ -346,7 +341,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
     SELECT row_to_json(s) FROM (
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
-            success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab,score_quality, orchestration_issues AS orchestration,
+            success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab,score_experience, orchestration_issues AS orchestration,
             scripting_issues AS scripting, unknowns, executions,
             (
                 SELECT array_to_json(array_agg(row_to_json(r)))
@@ -399,7 +394,7 @@ SELECT json_snapshot_upsert('{
 	"scripting": 30,
 	"unknowns": 12,
 	"executions": 1230,
-	"score_quality": 89,
+	"score_experience": 89,
 	"recommendations": [{
 		"rank": 1,
 		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
@@ -500,7 +495,7 @@ SELECT json_snapshot_upsert('{
 	"snapshotDate": "2018-06-20",
 	"last24h": 89,
 	"lab": 11,
-	"score_quality": 30,
+	"score_experience": 30,
 	"orchestration": 21,
 	"scripting": 31,
 	"unknowns": 13,
