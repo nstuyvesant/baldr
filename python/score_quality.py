@@ -15,12 +15,12 @@ def config_logging(log_name, log_path):
     logger.addHandler(fh)
     return logger
 
-## update the score_quality in the snapshots table
+## update the score_experience in the snapshots table
 def update_records(score,cloud_id):
     try:
         conn = psycopg2.connect("host='54.145.158.183' dbname='vr' user='postgres' password='mysecret123'")
         cursor = conn.cursor()
-        query = "UPDATE snapshots SET score_quality='"+str(score)+"'  WHERE cloud_id = '"+str(cloud_id)+"' and snapshot_date = TIMESTAMP 'yesterday'"
+        query = "UPDATE snapshots SET score_experience='"+str(score)+"'  WHERE cloud_id = '"+str(cloud_id)+"' and snapshot_date = TIMESTAMP 'yesterday'"
         cursor.execute(query)
         conn.commit()
         global_logger.info("db query result : " + str(cursor.rowcount))
@@ -74,7 +74,7 @@ def run_queries(cloud):
         return None
 
 ##MAIN
-global_logger = config_logging("salesforce", "/var/log/score_quality.log")
+global_logger = config_logging("salesforce", "/var/log/score_experience.log")
 config = configparser.ConfigParser()
 config.read('score.conf')
 defect_weight=  float(config['WEIGHT']['defect'])
