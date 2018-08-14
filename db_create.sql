@@ -74,16 +74,10 @@ CREATE TABLE public.snapshots (
 	scripting_issues bigint DEFAULT 0,
 	unknowns bigint DEFAULT 0,
 	executions bigint DEFAULT 0,
-<<<<<<< HEAD
   score_automation smallint DEFAULT 0,
   score_usage smallint DEFAULT 0,
   score_quality smallint DEFAULT 0,
   score_formula json DEFAULT '{}'::json,
-=======
-        score_automation smallint DEFAULT 0,
-        score_maturity smallint DEFAULT 0,
-        score_quality smallint DEFAULT 0,
->>>>>>> 92380182c403eeb47538b200b6fc55fde38259c9
 	UNIQUE (cloud_id, snapshot_date)
 );
 
