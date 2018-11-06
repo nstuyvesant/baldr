@@ -92,6 +92,7 @@ app.get('/api', authenticate, (req, res) => {
     client.query(`SELECT cloudSnapshot($1, $2::DATE)`, [cloud, date], (err, rows)=> {
       if (err) {
         res.status(424).json({ message: 'Not able to retrieve snapshot from database (but connected successfully).' })
+        client.end()
         return
       }
       const { cloudsnapshot } = rows[0]
@@ -99,6 +100,7 @@ app.get('/api', authenticate, (req, res) => {
         res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
       }
       res.status(200).send(cloudsnapshot) // Already JSON (stringify not necessary)
+      client.end()
     })
   })
 })
@@ -127,10 +129,12 @@ app.post('/api', authenticate, (req, res) => {
       if (err) {
         console.log(err)
         res.status(424).json({ message: 'Not able to submit snapshot to database (but connected successfully).' })
+        client.end()
         return
       }
       console.log('JSON received and processed.')
       res.status(200).json({ message: 'JSON received and processed.' })
+      client.end()
     })
   })
 })
