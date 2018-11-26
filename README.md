@@ -2,7 +2,9 @@
 [![express][express]][express-url]
 [![node][node]][node-url]
 
-# Perfecto Reporting
+![](https://vignette.wikia.nocookie.net/mythology/images/9/97/Baldr.jpg/revision/latest?cb=20170905010131)
+
+# Perfecto Project Baldr
 Named after the Norse God of Light, this server generates daily reports that increase visibility of automation obstacles. The server can be accessed at [https://baldr.perfecto.io/?cloud=FQDN&date=DATE-ISO-8601&securityToken=YOUR-SECURITY-TOKEN](https://baldr.perfecto.io/?cloud=demo.perfectomobile.com&date=2018-06-20&securityToken=) with the appropriate substitutions for the parameters listed. [This article](https://developers.perfectomobile.com/display/PD/Security+Token) explains how to request a security token.
 
 ## Getting Started
@@ -14,6 +16,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 - [Node.js 10.13.0 and npm 6.4.1](nodejs.org) (`brew install node@10`)
 - [PostgreSQL 10.5.0](http://postgresql.org) (`brew install postgresql`)
 - [pgAdmin4 3.5](https://www.postgresql.org/download/) (download and install it)
+- Perfecto security token from a US-hosted tenant such as demo.perfectomobile.com. See [this KnowledgeBase article](https://developers.perfectomobile.com/display/PD/Security+Token)
 
 ### Local Project Setup
 
@@ -33,11 +36,11 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 ### Testing
 
-1. To retrieve a customer-facing report, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
+1. To retrieve a customer-facing report, go to [http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=) replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
 
-2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=)
+2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=) replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
 
-3. To submit JSON via the API, go to [http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=)
+3. To submit JSON via the API, go to [http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=)  replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
 
 ### Production Setup
 
