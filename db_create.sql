@@ -18,12 +18,12 @@ $do$;
 -- Forcefully disconnect anyone
 SELECT pid, pg_terminate_backend(pid) 
 FROM pg_stat_activity 
-WHERE datname = 'vr' AND pid <> pg_backend_pid();
+WHERE datname = 'baldr' AND pid <> pg_backend_pid();
 
-DROP DATABASE IF EXISTS vr;
+DROP DATABASE IF EXISTS baldr;
 
 -- Create database
-CREATE DATABASE vr
+CREATE DATABASE baldr
     WITH 
     OWNER = baldr
     ENCODING = 'UTF8'
@@ -32,11 +32,11 @@ CREATE DATABASE vr
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1;
 
-COMMENT ON DATABASE vr
+COMMENT ON DATABASE baldr
     IS 'Value Realization';
 
--- Connect to vr database
-\connect vr
+-- Connect to baldr database
+\connect baldr
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -65,23 +65,20 @@ COMMENT ON COLUMN public.test_age.cloud_id IS 'Foreign key to cloud';
 COMMENT ON COLUMN public.test_age.first_seen IS 'First date we saw that test';
 
 CREATE TABLE public.snapshots (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  cloud_id uuid NOT NULL REFERENCES clouds(id) ON DELETE CASCADE,
-  snapshot_date date DEFAULT CURRENT_DATE NOT NULL,
-  success_rate smallint DEFAULT 0,
-  lab_issues bigint DEFAULT 0,
-  orchestration_issues bigint DEFAULT 0,
-  scripting_issues bigint DEFAULT 0,
-  unknowns bigint DEFAULT 0,
-  executions bigint DEFAULT 0,
-  score_automation smallint DEFAULT 0,
-  score_experience smallint DEFAULT 0,
-  score_usage smallint DEFAULT 0,
-  score_formula json DEFAULT '{}'::json,
-  score_automation smallint DEFAULT 0,
-  score_experience smallint DEFAULT 0,
-  score_usage smallint DEFAULT 0,
-  UNIQUE (cloud_id, snapshot_date)
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    cloud_id uuid NOT NULL REFERENCES clouds(id) ON DELETE CASCADE,
+    snapshot_date date NOT NULL DEFAULT CURRENT_DATE,
+    success_rate smallint NOT NULL DEFAULT 0,
+    lab_issues bigint NOT NULL DEFAULT 0,
+    orchestration_issues bigint NOT NULL DEFAULT 0,
+    scripting_issues bigint NOT NULL DEFAULT 0,
+    unknowns bigint NOT NULL DEFAULT 0,
+    executions bigint NOT NULL DEFAULT 0,
+    score_automation smallint DEFAULT 0,
+    score_experience smallint DEFAULT 0,
+    score_usage smallint DEFAULT 0,
+    score_formula json DEFAULT '{}'::json,
+    UNIQUE (cloud_id, snapshot_date)
 );
 
 COMMENT ON COLUMN public.snapshots.cloud_id IS 'Foreign key to cloud';
@@ -181,26 +178,34 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create snapshot or update if one exists
-CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, integer, integer, OUT snapshot_id uuid) AS $$
+CREATE OR REPLACE FUNCTION snapshot_add(uuid, date, integer, integer, integer, integer, integer, integer, integer default null, integer default null, integer default null, OUT snapshot_id uuid) AS $$
 BEGIN
-    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions ,score_experience)
-        VALUES ($1, $2, $3, $4, $5, $6 ,$7, $8 , $9)
+    INSERT INTO snapshots(cloud_id, snapshot_date, success_rate, lab_issues, orchestration_issues, scripting_issues, unknowns, executions, score_automation, score_experience, score_usage)
+        VALUES ($1, $2, $3, $4, $5, $6 ,$7, $8, $9, $10, $11)
             ON CONFLICT (cloud_id, snapshot_date)
-                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8 , score_experience = $9
+                DO UPDATE SET success_rate = $3, lab_issues = $4, orchestration_issues = $5, scripting_issues = $6, unknowns= $7, executions = $8, score_automation = $9, score_experience = $10, score_usage = $11
             RETURNING id INTO snapshot_id;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Delete snapshot
-CREATE OR REPLACE FUNCTION snapshot_delete(uuid, OUT done boolean) AS $$
+CREATE OR REPLACE FUNCTION public.snapshot_delete(
+	uuid,
+	OUT done boolean)
+    RETURNS boolean
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 BEGIN
-  DELETE FROM snapshots WHERE snapshot_id = $1;
+	DELETE FROM snapshots WHERE snapshot_id = $1;
     DELETE FROM recommendations WHERE snapshot_id = $1;
     DELETE FROM devices WHERE snapshot_id = $1;
     DELETE FROM tests WHERE snapshot_id = $1;
-  done := true;
+	done := true;
 END;
-$$ LANGUAGE plpgsql;
+$BODY$;
 
 -- Add a device to the snapshot
 CREATE OR REPLACE FUNCTION device_add(uuid, integer, character varying(255), character varying(255), character varying(255), integer, integer, integer, OUT devices_id uuid) AS $$
@@ -227,8 +232,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Read a snapshot in JSON format
-CREATE OR REPLACE FUNCTION json_snapshot_upsert(input json, OUT done boolean) AS $$
-DECLARE
+CREATE OR REPLACE FUNCTION public.json_snapshot_upsert(
+	input json,
+	OUT done boolean)
+    RETURNS boolean
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$DECLARE
     v_cloud_id uuid := cloud_upsert((input->>'fqdn')::varchar);
     v_snapshot_id uuid;
 BEGIN
@@ -240,8 +252,7 @@ BEGIN
         (input->>'orchestration')::integer,
         (input->>'scripting')::integer,
         (input->>'unknowns')::integer,
-    (input->>'executions')::integer,
-    (input->>'score_experience')::integer
+		(input->>'executions')::integer
     );
     -- Delete records related to existing snapshot (as this will overwrite)
     DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
@@ -294,7 +305,7 @@ BEGIN
             ON CONFLICT DO NOTHING;
     done := TRUE;
 END;
-$$ LANGUAGE plpgsql;
+$BODY$;
 
 -- Load test data dependencies
 CREATE OR REPLACE FUNCTION populate_test_data(OUT done boolean) AS $$
@@ -322,37 +333,45 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Nice view to simplify main inner join
-CREATE OR REPLACE VIEW clouds_snapshots AS
-    SELECT
-        clouds.id AS cloud_id,
-        fqdn,
-        snapshots.id AS snapshot_id,
-        snapshot_date,
-        success_rate,
-        (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
-          WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '7 days')::bigint AS success_last7d,
-        (SELECT SUM(success_rate*executions/100)/SUM(executions)*100 FROM snapshots
-          WHERE cloud_id = clouds.id AND snapshot_date > snapshot_date - INTERVAL '14 days')::bigint AS success_last14d,
-        lab_issues,
-        score_experience,
-        orchestration_issues,
-        scripting_issues,
-        unknowns,
-        executions,
-        score_automation AS automation,
-        score_experience AS experience,
-        score_usage AS usage
-    FROM clouds
-    INNER JOIN
-        snapshots ON clouds.id = snapshots.cloud_id;
+CREATE OR REPLACE VIEW public.clouds_snapshots AS
+ SELECT clouds.id AS cloud_id,
+    clouds.fqdn,
+    snapshots.id AS snapshot_id,
+    snapshots.snapshot_date,
+    snapshots.success_rate,
+    (( SELECT sum(snapshots_1.success_rate * snapshots_1.executions / 100) / sum(snapshots_1.executions) * 100::numeric
+           FROM snapshots snapshots_1
+          WHERE snapshots_1.cloud_id = clouds.id AND snapshots_1.snapshot_date > (snapshots_1.snapshot_date - '7 days'::interval)))::bigint AS success_last7d,
+    (( SELECT sum(snapshots_1.success_rate * snapshots_1.executions / 100) / sum(snapshots_1.executions) * 100::numeric
+           FROM snapshots snapshots_1
+          WHERE snapshots_1.cloud_id = clouds.id AND snapshots_1.snapshot_date > (snapshots_1.snapshot_date - '14 days'::interval)))::bigint AS success_last14d,
+    snapshots.lab_issues,
+    snapshots.orchestration_issues,
+    snapshots.scripting_issues,
+    snapshots.unknowns,
+    snapshots.executions,
+    snapshots.score_automation AS "scoreAutomation",
+    snapshots.score_experience AS "scoreExperience",
+    snapshots.score_usage AS "scoreUsage"
+   FROM clouds
+     JOIN snapshots ON clouds.id = snapshots.cloud_id;
 
 -- Return a complete snapshot for a cloud on a particular date in JSON format
-CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS json AS $$
+CREATE OR REPLACE FUNCTION public.cloudsnapshot(
+	character varying,
+	date)
+    RETURNS json
+    LANGUAGE 'sql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
     SELECT row_to_json(s) FROM (
         SELECT
             fqdn, snapshot_date AS "snapshotDate", success_rate AS last24h,
-            success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab,score_experience, orchestration_issues AS orchestration,
-            scripting_issues AS scripting, unknowns, executions, automation, experience, usage
+            success_last7d AS last7d, success_last14d AS last14d, lab_issues AS lab, orchestration_issues AS orchestration,
+            scripting_issues AS scripting, unknowns, executions, "scoreAutomation", "scoreExperience", "scoreUsage",
             (
                 SELECT array_to_json(array_agg(row_to_json(r)))
                 FROM (
@@ -382,7 +401,7 @@ CREATE OR REPLACE FUNCTION cloudSnapshot(character varying(255), date) RETURNS j
             ) AS "topFailingTests"
         FROM clouds_snapshots
         WHERE fqdn = $1 AND snapshot_date = $2::DATE) s;
-$$ LANGUAGE sql;
+$BODY$;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO baldr;
@@ -396,213 +415,213 @@ BEGIN; -- Start a transaction
 
 -- Show how to populate test data using JSON - alternative to the functions in populate_test_data()
 SELECT json_snapshot_upsert('{
-  "fqdn": "demo.perfectomobile.com",
-  "snapshotDate": "2018-06-19",
-  "last24h": 37,
-  "lab": 10,
-  "orchestration": 20,
-  "scripting": 30,
-  "unknowns": 12,
-  "executions": 1230,
-  "score_experience": 89,
-  "recommendations": [{
-    "rank": 1,
-    "recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
-    "impact": 30,
-    "impactMessage": null
-  }, {
-    "rank": 2,
-    "recommendation": "Use smart check for busy devices",
-    "impact": 15,
-    "impactMessage": null
-  }, {
-    "rank": 3,
-    "recommendation": "Remediate TransferMoney test",
-    "impact": 12,
-    "impactMessage": null
-  }, {
-    "rank": 4,
-    "recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
-    "impact": 6,
-    "impactMessage": null
-  }, {
-    "rank": 5,
-    "recommendation": "Ensure tests use Digitalzoom API",
-    "impact": 0,
-    "impactMessage": "Eliminate 720 Unknowns"
-  }],
-  "topProblematicDevices": [{
-    "rank": 1,
-    "model": "iPhone-5S",
-    "os": "iOS 9.2.1",
-    "id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
-    "passed": 0,
-    "failed": 25,
-    "errors": 10
-  }, {
-    "rank": 2,
-    "model": "Galaxy S5",
-    "os": "Android 5.0",
-    "id": "B5DED881",
-    "passed": 0,
-    "failed": 23,
-    "errors": 23
-  }, {
-    "rank": 3,
-    "model": "Galaxy Note III",
-    "os": "Android 4.4",
-    "id": "61F1BF00",
-    "passed": 1,
-    "failed": 15,
-    "errors": 10
-  }, {
-    "rank": 4,
-    "model": "Nexus 5",
-    "os": "Android 5.0",
-    "id": "06B25936007418BB",
-    "passed": 2,
-    "failed": 13,
-    "errors": 9
-  }, {
-    "rank": 5,
-    "model": "iPhone-6",
-    "os": "iOS 9.1",
-    "id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
-    "passed": 2,
-    "failed": 12,
-    "errors": 8
-  }],
-  "topFailingTests": [{
-    "rank": 1,
-    "test": "TransferMoney",
-    "failures": 75,
-    "passes": 0
-  }, {
-    "rank": 2,
-    "test": "FindBranch",
-    "failures": 71,
-    "passes": 3
-  }, {
-    "rank": 3,
-    "test": "HonkHorn",
-    "failures": 68,
-    "passes": 13
-  }, {
-    "rank": 4,
-    "test": "InsuranceSearch",
-    "failures": 7,
-    "passes": 0
-  }, {
-    "rank": 5,
-    "test": "RemoteStart",
-    "failures": 41,
-    "passes": 25
-  }]
+	"fqdn": "demo.perfectomobile.com",
+	"snapshotDate": "2018-06-19",
+	"last24h": 37,
+	"lab": 10,
+	"orchestration": 20,
+	"scripting": 30,
+	"unknowns": 12,
+	"executions": 1230,
+	"score_experience": 89,
+	"recommendations": [{
+		"rank": 1,
+		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+		"impact": 30,
+		"impactMessage": null
+	}, {
+		"rank": 2,
+		"recommendation": "Use smart check for busy devices",
+		"impact": 15,
+		"impactMessage": null
+	}, {
+		"rank": 3,
+		"recommendation": "Remediate TransferMoney test",
+		"impact": 12,
+		"impactMessage": null
+	}, {
+		"rank": 4,
+		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+		"impact": 6,
+		"impactMessage": null
+	}, {
+		"rank": 5,
+		"recommendation": "Ensure tests use Digitalzoom API",
+		"impact": 0,
+		"impactMessage": "Eliminate 720 Unknowns"
+	}],
+	"topProblematicDevices": [{
+		"rank": 1,
+		"model": "iPhone-5S",
+		"os": "iOS 9.2.1",
+		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+		"passed": 0,
+		"failed": 25,
+		"errors": 10
+	}, {
+		"rank": 2,
+		"model": "Galaxy S5",
+		"os": "Android 5.0",
+		"id": "B5DED881",
+		"passed": 0,
+		"failed": 23,
+		"errors": 23
+	}, {
+		"rank": 3,
+		"model": "Galaxy Note III",
+		"os": "Android 4.4",
+		"id": "61F1BF00",
+		"passed": 1,
+		"failed": 15,
+		"errors": 10
+	}, {
+		"rank": 4,
+		"model": "Nexus 5",
+		"os": "Android 5.0",
+		"id": "06B25936007418BB",
+		"passed": 2,
+		"failed": 13,
+		"errors": 9
+	}, {
+		"rank": 5,
+		"model": "iPhone-6",
+		"os": "iOS 9.1",
+		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+		"passed": 2,
+		"failed": 12,
+		"errors": 8
+	}],
+	"topFailingTests": [{
+		"rank": 1,
+		"test": "TransferMoney",
+		"failures": 75,
+		"passes": 0
+	}, {
+		"rank": 2,
+		"test": "FindBranch",
+		"failures": 71,
+		"passes": 3
+	}, {
+		"rank": 3,
+		"test": "HonkHorn",
+		"failures": 68,
+		"passes": 13
+	}, {
+		"rank": 4,
+		"test": "InsuranceSearch",
+		"failures": 7,
+		"passes": 0
+	}, {
+		"rank": 5,
+		"test": "RemoteStart",
+		"failures": 41,
+		"passes": 25
+	}]
 }'::json);
 
 SELECT json_snapshot_upsert('{
-  "fqdn": "demo.perfectomobile.com",
-  "snapshotDate": "2018-06-20",
-  "last24h": 89,
-  "lab": 11,
-  "score_experience": 30,
-  "orchestration": 21,
-  "scripting": 31,
-  "unknowns": 13,
-  "executions": 1028,
-  "recommendations": [{
-    "rank": 1,
-    "recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
-    "impact": 30,
-    "impactMessage": null
-  }, {
-    "rank": 2,
-    "recommendation": "Use smart check for busy devices",
-    "impact": 15,
-    "impactMessage": null
-  }, {
-    "rank": 3,
-    "recommendation": "Remediate TransferMoney test",
-    "impact": 12,
-    "impactMessage": null
-  }, {
-    "rank": 4,
-    "recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
-    "impact": 6,
-    "impactMessage": null
-  }, {
-    "rank": 5,
-    "recommendation": "Ensure tests use Digitalzoom API",
-    "impact": 0,
-    "impactMessage": "Eliminate 720 Unknowns"
-  }],
-  "topProblematicDevices": [{
-    "rank": 1,
-    "model": "iPhone-5S",
-    "os": "iOS 9.2.1",
-    "id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
-    "passed": 0,
-    "failed": 25,
-    "errors": 10
-  }, {
-    "rank": 2,
-    "model": "Galaxy S5",
-    "os": "Android 5.0",
-    "id": "B5DED881",
-    "passed": 0,
-    "failed": 23,
-    "errors": 23
-  }, {
-    "rank": 3,
-    "model": "Galaxy Note III",
-    "os": "Android 4.4",
-    "id": "61F1BF00",
-    "passed": 1,
-    "failed": 15,
-    "errors": 10
-  }, {
-    "rank": 4,
-    "model": "Nexus 5",
-    "os": "Android 5.0",
-    "id": "06B25936007418BB",
-    "passed": 2,
-    "failed": 13,
-    "errors": 9
-  }, {
-    "rank": 5,
-    "model": "iPhone-6",
-    "os": "iOS 9.1",
-    "id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
-    "passed": 2,
-    "failed": 12,
-    "errors": 8
-  }],
-  "topFailingTests": [{
-    "rank": 1,
-    "test": "TransferMoney",
-    "failures": 75,
-    "passes": 0
-  }, {
-    "rank": 2,
-    "test": "FindBranch",
-    "failures": 71,
-    "passes": 3
-  }, {
-    "rank": 3,
-    "test": "HonkHorn",
-    "failures": 68,
-    "passes": 13
-  }, {
-    "rank": 4,
-    "test": "InsuranceSearch",
-    "failures": 7,
-    "passes": 0
-  }, {
-    "rank": 5,
-    "test": "RemoteStart",
-    "failures": 41,
-    "passes": 25
-  }]
+	"fqdn": "demo.perfectomobile.com",
+	"snapshotDate": "2018-06-20",
+	"last24h": 89,
+	"lab": 11,
+	"score_experience": 30,
+	"orchestration": 21,
+	"scripting": 31,
+	"unknowns": 13,
+	"executions": 1028,
+	"recommendations": [{
+		"rank": 1,
+		"recommendation": "Replace iPhone-5S (544cc6c6026af23c11f5ed6387df5d5f724f60fb) due to errors",
+		"impact": 30,
+		"impactMessage": null
+	}, {
+		"rank": 2,
+		"recommendation": "Use smart check for busy devices",
+		"impact": 15,
+		"impactMessage": null
+	}, {
+		"rank": 3,
+		"recommendation": "Remediate TransferMoney test",
+		"impact": 12,
+		"impactMessage": null
+	}, {
+		"rank": 4,
+		"recommendation": "XPath /bookstore/book[1]/title is broken (affects 30 tests)",
+		"impact": 6,
+		"impactMessage": null
+	}, {
+		"rank": 5,
+		"recommendation": "Ensure tests use Digitalzoom API",
+		"impact": 0,
+		"impactMessage": "Eliminate 720 Unknowns"
+	}],
+	"topProblematicDevices": [{
+		"rank": 1,
+		"model": "iPhone-5S",
+		"os": "iOS 9.2.1",
+		"id": "544cc6c6026af23c11f5ed6387df5d5f724f60fb",
+		"passed": 0,
+		"failed": 25,
+		"errors": 10
+	}, {
+		"rank": 2,
+		"model": "Galaxy S5",
+		"os": "Android 5.0",
+		"id": "B5DED881",
+		"passed": 0,
+		"failed": 23,
+		"errors": 23
+	}, {
+		"rank": 3,
+		"model": "Galaxy Note III",
+		"os": "Android 4.4",
+		"id": "61F1BF00",
+		"passed": 1,
+		"failed": 15,
+		"errors": 10
+	}, {
+		"rank": 4,
+		"model": "Nexus 5",
+		"os": "Android 5.0",
+		"id": "06B25936007418BB",
+		"passed": 2,
+		"failed": 13,
+		"errors": 9
+	}, {
+		"rank": 5,
+		"model": "iPhone-6",
+		"os": "iOS 9.1",
+		"id": "8E1CBC7E90168A3A7CFDA2712A8C20DD15517F89",
+		"passed": 2,
+		"failed": 12,
+		"errors": 8
+	}],
+	"topFailingTests": [{
+		"rank": 1,
+		"test": "TransferMoney",
+		"failures": 75,
+		"passes": 0
+	}, {
+		"rank": 2,
+		"test": "FindBranch",
+		"failures": 71,
+		"passes": 3
+	}, {
+		"rank": 3,
+		"test": "HonkHorn",
+		"failures": 68,
+		"passes": 13
+	}, {
+		"rank": 4,
+		"test": "InsuranceSearch",
+		"failures": 7,
+		"passes": 0
+	}, {
+		"rank": 5,
+		"test": "RemoteStart",
+		"failures": 41,
+		"passes": 25
+	}]
 }'::json);
 
 COMMIT;
