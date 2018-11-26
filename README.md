@@ -30,7 +30,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 5. Type `cd baldr && npm install` to connect to the directory and install NodeJS dependencies
 
-6. Type `psql -d postgres -f db_create.sql` to create the vr database and populate it with sample data for a cloud called demo.perfectomobile.com with a snapshot for 2018-06-20
+6. Type `psql -d postgres -f db_create.sql` to create the baldr database and populate it with sample data for a cloud called demo.perfectomobile.com with a snapshot for 2018-06-20
 
 7. Type `npm start`
 
