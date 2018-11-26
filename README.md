@@ -16,7 +16,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 - [Node.js 10.13.0 and npm 6.4.1](nodejs.org) (`brew install node@10`)
 - [PostgreSQL 10.5.0](http://postgresql.org) (`brew install postgresql`)
 - [pgAdmin4 3.5](https://www.postgresql.org/download/) (download and install it)
-- Perfecto security token from a US-hosted tenant such as demo.perfectomobile.com. See [this KnowledgeBase article](https://developers.perfectomobile.com/display/PD/Security+Token)
+- Perfecto security token from a US-hosted tenant such as demo.perfectomobile.com. See [this KnowledgeBase article](https://developers.perfectomobile.com/display/PD/Security+Token).
 
 ### Local Project Setup
 
