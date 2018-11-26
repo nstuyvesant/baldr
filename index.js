@@ -8,9 +8,12 @@ const helmet = require('helmet')
 const https = require('https')
 const port = process.env.NODE_PORT || 3000;
 
+// Note: Only uncomment console.log statements for debugging (ExpressJS best practice)
+
 // Middleware function to check for and validate cloud and securityToken
 const authenticate = (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
+
   // Check if parameters are present - bail out if not
   const missingParams = !(cloud && (securityToken || (user && password)))
   if (missingParams) {
@@ -27,13 +30,14 @@ const authenticate = (req, res, next) => {
 
   // Enable either tokens or user/password for authentication
   const securityParams = securityToken ? `securityToken=${securityToken}` : `user=${user}&password=${password}`
+
   // Perform REST API operation that returns the smallest amount of JSON (reservations for no one)
   https.get(`https://${fqdn}/services/reservations/?operation=list&reservedTo=noone&${securityParams}`, getResponse => {
     const { statusCode } = getResponse
     if (statusCode !== 200) {
       getResponse.resume() // consume getResponse to free up memory
       if (statusCode === 401) {
-        console.log('Did not authenticate successfully')
+        // console.log('Did not authenticate successfully')
         res.status(401).json({ message: 'Not authorized: cloud/securityToken (or user/password) did not authenticate. Is your token or user/password combination correct or could your token have expired?' })
         return
       }
@@ -48,14 +52,14 @@ const authenticate = (req, res, next) => {
     getResponse.on('end', () => {
       const response = JSON.parse(rawData)
       if (response.info) { // Authenticated successfully
-        console.log(`Successfully authenticated to ${fqdn}`)
+        // console.log(`Successfully authenticated to ${fqdn}`)
         return next()
       } else {
         res.status(417).json({ message: 'Received unexpected response from cloud.' })
       }
     })
   }).on('error', (e) => {
-    console.error(`Got error: ${e.message}`)
+    // console.error(`Got error: ${e.message}`)
     res.status(424).json({ message: 'Could not connect to that cloud. Did you specify a valid fully-qualified domain name?' })
   })
 }
@@ -73,71 +77,70 @@ app.use(express.json());
 // Serve up any content requested from /public
 app.use(express.static(path.join(__dirname, 'public')))
 
-// Handle HTTP GET to retrieve the snapshot
-app.get('/api', authenticate, (req, res) => {
-  const client = new Client()
-  const { cloud, date } = req.query
-  const missingParams = !(cloud || date)
-  if (missingParams) {
-    res.status(400).json({ message: 'Missing parameter(s): cloud and date are required.' })
-    return
-  }
-  // Try connecting to PostgreSQL
-  client.connect(pgConnectionString, err => {
-    if (err) {
-      res.status(401).json({ message: 'Not able to connect to database to retrieve snapshot.' })
+// HTTP routes
+app.route('/api')
+  .get(authenticate, (req, res) => {
+    const client = new Client()
+    const { cloud, date } = req.query
+    const missingParams = !(cloud || date)
+    if (missingParams) {
+      res.status(400).json({ message: 'Missing parameter(s): cloud and date are required.' })
       return
     }
-    // Run parameterized query to prevent SQL injection
-    client.query(`SELECT cloudSnapshot($1, $2::DATE)`, [cloud, date], (err, rows)=> {
+    // Try connecting to PostgreSQL
+    client.connect(pgConnectionString, err => {
       if (err) {
-        res.status(424).json({ message: 'Not able to retrieve snapshot from database (but connected successfully).' })
-        client.end()
+        res.status(401).json({ message: 'Not able to connect to database to retrieve snapshot.' })
         return
       }
-      const { cloudsnapshot } = rows[0]
-      if (!cloudsnapshot) {
-        res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
-      }
-      res.status(200).send(cloudsnapshot) // Already JSON (stringify not necessary)
-      client.end()
+      // Run parameterized query to prevent SQL injection
+      client.query(`SELECT cloudSnapshot($1, $2::DATE)`, [cloud, date], (err, rows)=> {
+        if (err) {
+          res.status(424).json({ message: 'Not able to retrieve snapshot from database (but connected successfully).' })
+          client.end()
+          return
+        }
+        const { cloudsnapshot } = rows[0]
+        if (!cloudsnapshot) {
+          res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
+        }
+        res.status(200).send(cloudsnapshot) // Already JSON (stringify not necessary)
+        client.end()
+      })
     })
   })
-})
-
-// Handle HTTP POST of JSON to /api
-app.post('/api', authenticate, (req, res) => {
-  if(!req.body.snapshot) { // Is there content?
-    res.status(444).json({ message: 'Nothing received.' })
-    return
-  }
-  console.log('Received JSON request.')
-  const snapshot = JSON.parse(req.body.snapshot)
-  authorizedToUpsert = req.query.cloud === snapshot.fqdn
-  if (!authorizedToUpsert) {
-    res.status(401).json({ message: 'You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.' })
-    return
-  }
-  let client = new Client()
-  client.connect(pgConnectionString, (err) => {
-    if (err) {
-      res.status(401).json({ message: 'Not able to connect to database to submit snapshot.' })
+  .post(authenticate, (req, res) => {
+    if(!req.body.snapshot) { // Is there content?
+      res.status(444).json({ message: 'Nothing received.' })
       return
     }
-    let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
-    client.query(sql, [req.body.snapshot], (err)=> {
+    // console.log('Received JSON request.')
+    const snapshot = JSON.parse(req.body.snapshot)
+    authorizedToUpsert = req.query.cloud === snapshot.fqdn
+    if (!authorizedToUpsert) {
+      res.status(401).json({ message: 'You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.' })
+      return
+    }
+    let client = new Client()
+    client.connect(pgConnectionString, (err) => {
       if (err) {
-        console.log(err)
-        res.status(424).json({ message: 'Not able to submit snapshot to database (but connected successfully).' })
-        client.end()
+        res.status(401).json({ message: 'Not able to connect to database to submit snapshot.' })
         return
       }
-      console.log('JSON received and processed.')
-      res.status(200).json({ message: 'JSON received and processed.' })
-      client.end()
+      let sql = `SELECT json_snapshot_upsert($1::json)` // parameterized to prevent SQL injection
+      client.query(sql, [req.body.snapshot], (err)=> {
+        if (err) {
+          // console.log(err)
+          res.status(424).json({ message: 'Not able to submit snapshot to database (but connected successfully).' })
+          client.end()
+          return
+        }
+        // console.log('JSON received and processed.')
+        res.status(200).json({ message: 'JSON received and processed.' })
+        client.end()
+      })
     })
   })
-})
 
 // Listen for requests
 app.listen(port, () => console.log(`Baldr listening on port ${port}.`))
