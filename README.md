@@ -11,9 +11,9 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 - [Homebrew](https://brew.sh) (`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`)
 - [Git](https://git-scm.com/) (`brew install git`)
-- [Node.js 10.5.0 and npm 6.1.0](nodejs.org) (`brew install node`)
-- [PostgreSQL 10.4.0](http://postgresql.org) (`brew install postgresql`)
-- [pgAdmin4 3.0](https://www.postgresql.org/download/) (download and install it)
+- [Node.js 10.13.0 and npm 6.4.1](nodejs.org) (`brew install node@10`)
+- [PostgreSQL 10.5.0](http://postgresql.org) (`brew install postgresql`)
+- [pgAdmin4 3.5](https://www.postgresql.org/download/) (download and install it)
 
 ### Local Project Setup
 
@@ -71,10 +71,9 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 14. Test by typing `curl https://fqdn/editor.html`
 
-15. Create a new cron job for the report analyser jar :  "0 0 * * *  cd /home/baldr/uploader/; java -jar ReportAnalyzer-3.0.jar"
+15. Create a cron job for the report analyzer jar by adding this line to your crontab `0 0 * * *  cd /home/baldr/uploader/; java -jar ReportAnalyzer-3.0.jar` 
 
-16. Create a new Cron job that populates the quality score "0 2 * * *  python /home/baldr/python/score_quality.py"
-
+16. Create a cron job that populates the quality score `0 2 * * *  python /home/baldr/python/score_quality.py`
 
 
 ### Overview of files
@@ -89,9 +88,9 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 - [sample-output.json](https://github.com/nstuyvesant/baldr/blob/master/public/sample-output.json) - JSON sample returned by the HTTP GET handler in [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js). The difference from the input are the two properties: last7d and last14d. These are not part of the input as they are calculated from previous daily snapshots.
 
-[express]: https://img.shields.io/badge/expressjs-4.16.3-red.svg
+[express]: https://img.shields.io/badge/expressjs-4.16.4-red.svg
 [express-url]: http://expressjs.com
-[node]: https://img.shields.io/badge/nodejs-10.5.0-green.svg
+[node]: https://img.shields.io/badge/nodejs-10.13.0-green.svg
 [node-url]: https://nodejs.org
-[postgresql]: https://img.shields.io/badge/postgresql-10.4.0-blue.svg
+[postgresql]: https://img.shields.io/badge/postgresql-10.5.0-blue.svg
 [postgresql-url]: https://www.postgresql.org
