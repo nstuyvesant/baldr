@@ -26,7 +26,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 3. Type `brew services start postgresql` to start PostgreSQL (if not already running)
 
-4. Type `git clone https://github.com/nstuyvesant/baldr.git` to clone the project
+4. From your main development directory (I use ~/dev), type `git clone https://github.com/nstuyvesant/baldr.git` to clone the project
 
 5. Type `cd baldr && npm install` to connect to the directory and install NodeJS dependencies
 
