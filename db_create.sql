@@ -119,7 +119,7 @@ CREATE TABLE public.recommendations (
     snapshot_id uuid NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
     rank smallint DEFAULT 1 NOT NULL,
     recommendation character varying(2000) NOT NULL,
-    impact_percentage smallint DEFAULT 0 NOT NULL,
+    impact_percentage NUMERIC DEFAULT 0 NOT NULL,
     impact_message character varying(2000),
     UNIQUE (snapshot_id, rank)
 );
@@ -127,7 +127,7 @@ CREATE TABLE public.recommendations (
 COMMENT ON COLUMN public.recommendations.snapshot_id IS 'Foreign key to snapshot record';
 COMMENT ON COLUMN public.recommendations.rank IS 'Report ranking of the importance of the recommendation';
 COMMENT ON COLUMN public.recommendations.recommendation IS 'Specific recommendation such as "Replace top 5 failing devices" or "Remediate TransferMoney test"';
-COMMENT ON COLUMN public.recommendations.impact_percentage IS 'Percentage of improvement to success rate if the recommendation is implemented (use 0 to 100 rather than decimal < 1)';
+COMMENT ON COLUMN public.recommendations.impact_percentage IS 'Percentage of improvement to success rate if the recommendation is implemented';
 COMMENT ON COLUMN public.recommendations.impact_message IS 'For recommendations that do not have a clear impact such as "Ensure tests use Digitalzoom API" (impact should equal 0 for those)';
 
 CREATE TABLE public.tests (
@@ -265,7 +265,7 @@ BEGIN
             v_snapshot_id AS snapshot_id,
             (value->>'rank')::smallint AS rank,
             (value->>'recommendation')::varchar AS recommendation,
-            (value->>'impact')::integer AS impact_percentage,
+            (value->>'impact')::NUMERIC AS impact_percentage,
             (value->>'impactMessage')::varchar AS impact_message
         FROM json_array_elements(input->'recommendations')
     )
