@@ -353,7 +353,7 @@
                 for (let index in reportData.recommendations) {
                     let recommendation = reportData.recommendations[index]
                     if (recommendation.impact) {
-                        totalImpact += parseInt(recommendation.impact, 10)
+                        totalImpact += parseFloat(recommendation.impact)
                         impactText = '+' + recommendation.impact + '%'
                     } else {
                         impactText = recommendation.impactMessage
@@ -361,7 +361,8 @@
                     tableRow = '<tr><th scope="row">' + recommendation.rank + '</th><td>' + recommendation.recommendation + '</td><td>' + impactText + '</td></tr>'
                     $('#recommendationsTable > tbody:last-child').append(tableRow)
                 }
-
+				//Round totalImpact to 2 decimal points
+				totalImpact = totalImpact.toFixed(2)
                 // Create table of problematic devices
                 $('#totalImpact').text(totalImpact)
                 for (let index in reportData.topProblematicDevices) {
