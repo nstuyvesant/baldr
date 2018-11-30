@@ -40,7 +40,9 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 2. To view JSON returned by the API, go to [http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/api/?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=) replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
 
-3. To submit JSON via the API, go to [http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=)  replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
+3. To edit previously submitted JSON directly in the editor, go to [http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&date=2018-06-19&securityToken=) replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
+
+4. To submit JSON via the API, go to [http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=YOUR-SECURITY-TOKEN](http://localhost:3000/editor.html?cloud=demo.perfectomobile.com&securityToken=)  replacing YOUR-SECURITY-TOKEN with the value you got from the Prerequisite step
 
 ### Production Setup
 
