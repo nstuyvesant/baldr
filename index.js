@@ -103,6 +103,8 @@ app.route('/api')
         const { cloudsnapshot } = rows[0]
         if (!cloudsnapshot) {
           res.status(404).json({ message: 'No snapshot for that cloud/date combination.' })
+          client.end()
+          return
         }
         res.status(200).send(cloudsnapshot) // Already JSON (stringify not necessary)
         client.end()
