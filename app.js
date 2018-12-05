@@ -1,3 +1,5 @@
+// Initialize ExpressJS and glue everything together
+
 const express = require('express')
 const path = require('path')
 const compression = require('compression')

@@ -8,7 +8,7 @@ Wants=postgresql.service
 User=baldr
 Environment=NODE_ENV=production NODE_PORT=3000
 WorkingDirectory=/home/baldr
-ExecStart=/usr/bin/node index.js
+ExecStart=/usr/bin/node app.js
 Type=simple
 Restart=on-failure
 
