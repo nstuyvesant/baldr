@@ -19,7 +19,8 @@
     "express": "^4.16.4",
     "express-promise-router": "^3.0.3",
     "helmet": "^3.15.0",
-    "pg": "^7.7.1"
+    "pg": "^7.7.1",
+    "pg-native": "^3.0.0"
   },
   "engines": {
     "node": "~10.14.1",
