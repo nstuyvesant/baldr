@@ -18,10 +18,9 @@ router.post('/', authenticate, async (req, res, next) => {
   try {
     // Check for content
     if(!req.body.snapshot) throw Error('Nothing received.')
-    const snapshot = JSON.parse(req.body.snapshot)
 
     // Check authorization
-    authorizedToUpsert = req.query.cloud === snapshot.fqdn
+    authorizedToUpsert = req.query.cloud === req.body.snapshot.fqdn
     if (!authorizedToUpsert) throw Error('You tried to update a different cloud (via JSON) from the one specified by the cloud querystring parameter.')
 
     const { rows } = await db.query('SELECT json_snapshot_upsert($1::json)', [req.body.snapshot])
