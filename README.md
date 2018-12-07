@@ -14,7 +14,7 @@ Named after the Norse God of Light, this server generates daily reports that inc
 - [Homebrew](https://brew.sh) (`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`)
 - [Git](https://git-scm.com/) (`brew install git`)
 - [Node.js 10.14.1 and npm 6.4.1](nodejs.org) (`brew install node@10`)
-- [PostgreSQL 10.6.0](http://postgresql.org) (`brew install postgresql`)
+- [PostgreSQL 11.1.0](http://postgresql.org) (`brew install postgresql`)
 - [pgAdmin4 3.6](https://www.postgresql.org/download/) (download and install it)
 - Perfecto security token from a US-hosted tenant such as demo.perfectomobile.com. See [this KnowledgeBase article](https://developers.perfectomobile.com/display/PD/Security+Token).
 
@@ -97,5 +97,5 @@ Named after the Norse God of Light, this server generates daily reports that inc
 [express-url]: http://expressjs.com
 [node]: https://img.shields.io/badge/nodejs-10.14.1-green.svg
 [node-url]: https://nodejs.org
-[postgresql]: https://img.shields.io/badge/postgresql-10.6.0-blue.svg
+[postgresql]: https://img.shields.io/badge/postgresql-11.1.0-blue.svg
 [postgresql-url]: https://www.postgresql.org
