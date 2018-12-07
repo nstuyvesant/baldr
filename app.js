@@ -9,14 +9,14 @@ const loadRoutes = require('./routes')
 const port = process.env.NODE_PORT || 3000
 const app = express()
 
-loadRoutes(app)
-
 app.use(helmet()) // basic security
 app.use(compression()); // compress all routes
 
 // Allow ExpressJS to support JSON but not URL-encoded bodies
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
+
+loadRoutes(app) // must be after we enable JSON support
 
 // Serve up any content requested from /public
 app.use(express.static(path.join(__dirname, 'public')))
