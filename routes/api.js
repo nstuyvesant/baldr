@@ -6,7 +6,7 @@ const router = new Router()
 router.get('/', authenticate, async (req, res, next) => {
   try {
     const { cloud, date } = req.query
-    const { rows } = await db.query('SELECT cloudSnapshot($1, $2::DATE)', [cloud, date])
+    const { rows } = await db.query('SELECT cloudsnapshot($1, $2::DATE)', [cloud, date])
     res.status(200).send(rows[0].cloudsnapshot) // Already JSON (stringify not necessary)
   } catch(err) {
     res.status(400).json(err)
