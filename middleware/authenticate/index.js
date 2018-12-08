@@ -1,4 +1,16 @@
-const https = require('https')
+/*
+  ExpressJS middleware to validate user based on Perfecto authentication
+
+  This explicitly stops the ExpressJS processing of the request (don't allow
+  anything else to happen if not authorized). Alternatively, we could throw
+  an Error.
+
+  It uses the Perfecto HTTP API to get a list of reservations to test for
+  authentication because the returned data should be short. Also, there's no
+  general HTTP API call to test a login. 
+*/
+
+const https = require('https') // So our server can do an HTTP GET to a Perfecto Cloud
 
 module.exports =  (req, res, next) => {
   const { cloud, securityToken, user, password } = req.query
@@ -48,7 +60,6 @@ module.exports =  (req, res, next) => {
       }
     })
   }).on('error', (e) => {
-    // console.error(`Got error: ${e.message}`)
     res.status(424).json({ message: 'Could not connect to that cloud. Did you specify a valid fully-qualified domain name?' })
   })
 }
