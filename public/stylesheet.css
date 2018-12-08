@@ -1,0 +1,40 @@
+h1, h2 {
+  color: #82bc41;
+}
+h2 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+.green {
+  color: white;
+  background-color: #82bc41;
+}
+.red {
+  color: white;
+  background-color: #e4495c;
+}
+.orange {
+  color: white;
+  background-color: orange;
+}
+h1 {
+  filter: none;
+  margin-bottom: 0px;
+  margin-top: 30px;
+}
+.metric {
+  font-size: 2rem;
+}
+.logo {
+  height:70px;
+  width: 220px;
+  margin-top: 20px;
+}
+.card-body {
+  padding: 0.5rem!important;
+}
+.card {
+  margin-top: 20px;
+}
+/* Chart.js */
+@-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}
