@@ -1,8 +1,8 @@
 {
   "name": "baldr",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Report of obstacles to successful automation",
-  "main": "index.js",
+  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nstuyvesant/baldr.git"
@@ -15,7 +15,7 @@
   "homepage": "https://github.com/nstuyvesant/baldr#readme",
   "dependencies": {
     "compression": "^1.7.3",
-    "eslint": "^5.9.0",
+    "eslint": "^5.10.0",
     "express": "^4.16.4",
     "express-promise-router": "^3.0.3",
     "helmet": "^3.15.0",

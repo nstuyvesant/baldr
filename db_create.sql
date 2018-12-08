@@ -1,7 +1,7 @@
 -- Invoke this script via
 -- $ psql -d postgres -f db_create.sql
 
--- Create user if doesn't exist
+-- Create user if not already there
 DO
 $do$
 BEGIN
@@ -20,6 +20,7 @@ SELECT pid, pg_terminate_backend(pid)
 FROM pg_stat_activity 
 WHERE datname = 'baldr' AND pid <> pg_backend_pid();
 
+DROP DATABASE IF EXISTS vr;
 DROP DATABASE IF EXISTS baldr;
 
 -- Create database

@@ -80,12 +80,11 @@ Named after the Norse God of Light, this server generates daily reports that inc
 
 16. Create a cron job that populates the quality score `0 2 * * *  python /home/baldr/python/score_quality.py`
 
-
 ### Overview of files
 
 - [db_create.sql](https://github.com/nstuyvesant/baldr/blob/master/db_create.sql) - Creates the PostgreSQL database, functions to generate JSON and populates with sample data
 
-- [index.js](https://github.com/nstuyvesant/baldr/blob/master/index.js) - Web server using [ExpressJS](http://expressjs.com) with [pg-native](https://github.com/brianc/node-pg-native) to serve report's UI and API for required JSON
+- [app.js](https://github.com/nstuyvesant/baldr/blob/master/app.js) - Web server using [ExpressJS](http://expressjs.com) with [pg-native](https://github.com/brianc/node-pg-native) to serve report's UI and API for required JSON
 
 - [editor.html](https://github.com/nstuyvesant/baldr/blob/master/public/editor.html) - JSON editor page. Submissions from this page are stored in the underlying PostgreSQL database, vr, replacing any contents for the snapshot date.
 

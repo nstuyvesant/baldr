@@ -1,4 +1,13 @@
-// Initialize ExpressJS and glue everything together
+/*
+  This is the ExpressJS app (our server).
+
+  It does the following:
+  - configures Express
+  - sets up handling of static files
+  - loads routes
+  - defines how errors will be handled (centrally)
+  - starts ExpressJS listening for requests
+*/
 
 const express = require('express')
 const path = require('path')
@@ -25,5 +34,5 @@ app.use((err, req, res, next) => { // <- Must have 4 parameters
   res.status(500).json(err)
 })
 
-// Listen for requests
+// Start listening for requests
 app.listen(port, () => console.log(`Baldr listening on port ${port}.`))
