@@ -254,24 +254,29 @@ BEGIN
         (input->>'unknowns')::integer,
 		(input->>'executions')::integer
     );
+	
     -- Delete records related to existing snapshot (as this will overwrite)
     DELETE FROM recommendations WHERE snapshot_id = v_snapshot_id;
     DELETE FROM devices WHERE snapshot_id = v_snapshot_id;
     DELETE FROM tests WHERE snapshot_id = v_snapshot_id;
 
     -- Add recommendations
-    WITH r AS (
+	IF (input->'recommendations')::text <> 'null' THEN
+      WITH r AS (
         SELECT
             v_snapshot_id AS snapshot_id,
             (value->>'rank')::smallint AS rank,
             (value->>'recommendation')::varchar AS recommendation,
-            (value->>'impact')::NUMERIC AS impact_percentage,
+            (value->>'impact')::numeric AS impact_percentage,
             (value->>'impactMessage')::varchar AS impact_message
         FROM json_array_elements(input->'recommendations')
-    )
-    INSERT INTO recommendations(snapshot_id, rank, recommendation, impact_percentage, impact_message) SELECT snapshot_id, rank, recommendation, impact_percentage, impact_message FROM r;
+      )
+      INSERT INTO recommendations(snapshot_id, rank, recommendation, impact_percentage, impact_message) SELECT snapshot_id, rank, recommendation, impact_percentage, impact_message FROM r;
+	END IF;
+	
     -- Add devices
-    WITH d AS (
+	IF (input->'topProblematicDevices')::text <> 'null' THEN
+      WITH d AS (
         SELECT
             v_snapshot_id AS snapshot_id,
             (value->>'rank')::smallint AS rank,
@@ -282,12 +287,15 @@ BEGIN
             (value->>'failed')::integer AS failed_executions_last24h,
             (value->>'errors')::integer AS errors_last24h
         FROM json_array_elements(input->'topProblematicDevices')
-    )
-    INSERT INTO
+      )
+      INSERT INTO
         devices(snapshot_id, rank, model, os, device_id, passed_executions_last24h, failed_executions_last24h, errors_last24h)
         SELECT snapshot_id, rank, model, os, device_id, passed_executions_last24h, failed_executions_last24h, errors_last24h FROM d;
+    END IF;
+
     -- Add tests
-    WITH t AS (
+	IF (input->'topFailingTests')::text <> 'null' THEN
+      WITH t AS (
         SELECT
             v_snapshot_id AS snapshot_id,
             (value->>'rank')::smallint AS rank,
@@ -295,10 +303,12 @@ BEGIN
             (value->>'failures')::integer AS failures_last24h,
             (value->>'passes')::integer AS passes_last24h
         FROM json_array_elements(input->'topFailingTests')
-    )
-    INSERT INTO
+      )
+      INSERT INTO
         tests(snapshot_id, rank, test_name, failures_last24h, passes_last24h)
         SELECT snapshot_id, rank, test_name, failures_last24h, passes_last24h FROM t;
+    END IF;		
+	
     INSERT INTO
         test_age(cloud_id, test_name)
         SELECT v_cloud_id, test_name FROM tests WHERE snapshot_id = v_snapshot_id
