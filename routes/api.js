@@ -14,11 +14,12 @@
 const Router = require('express-promise-router')
 const authenticate = require('../middleware/authenticate')
 const apiController = require('./api.controller')
+const asyncWrapper = require('../middleware/async-wrapper') // only wrap async functions
 
 const router = new Router()
 
 // HTTP GET /api handler (returns promise)
-router.get('/', authenticate, apiController.get)
-router.post('/', authenticate, apiController.post)
+router.get('/', authenticate, asyncWrapper(apiController.get))
+router.post('/', authenticate, asyncWrapper(apiController.post))
 
 module.exports = router

@@ -31,7 +31,12 @@ loadRoutes(app) // Alternatively, require('./routes').default(app);
 
 // ExpressJS error handler for all routes - must be last
 app.use((err, req, res, next) => { // <- Must have 4 parameters
-  res.status(500).json(err)
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || 'Something unexpected happened';
+  const errors = err.errors || [];
+  console.error(`\x1b[31mERROR ${status}: ${message}`); // display in red
+  res.statusMessage = message;
+  res.status(status).send({ status, message, errors });
 })
 
 // Start listening for requests

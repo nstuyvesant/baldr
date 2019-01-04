@@ -25,7 +25,7 @@ async function post(req, res) {
 
     // Check whether snapshot's fqdn is same as cloud querystring
     authorizedToUpsert = req.query.cloud === req.body.snapshot.fqdn
-    if (!authorizedToUpsert) throw new Error('The fqdn in your submitted JSON must match the cloud querystring parameter.')
+    if (!authorizedToUpsert) throw new Error(`The fqdn in your submitted JSON (${req.body.snapshot.fqdn}) must match the cloud querystring parameter (${req.query.cloud}).`)
 
     // Send snapshot to PostgreSQL
     const { rows } = await db.query('SELECT json_snapshot_upsert($1::json)', [req.body.snapshot])
